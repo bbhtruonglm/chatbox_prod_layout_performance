@@ -1,8 +1,12 @@
 import type { Language } from '@/service/interface/language'
 
 const source: Language = {
-  'Trợ lý AI đã tắt. Trợ lý AI sẽ tự động bật lại sau 60 phút nữa (lúc _)':
-    'The AI assistant is currently off. The AI assistant will automatically turn back on in 60 minutes (at {date})',
+  'Trợ lý AI đã tắt. Trợ lý AI sẽ tự động bật lại sau _ (lúc _)':
+    'The AI assistant is currently off. The AI assistant will automatically turn back on in {duration} (at {date})',
+  'Trợ lý AI được tắt.': 'The AI assistant is off.',
+  'Thời gian tắt AI': 'Turn off AI time',
+  'Tắt đến khi bật lại': 'Turn off when turn back on',
+  'Tắt trong _ giờ': 'Turn off in {hour} hours',
   'Trợ lý AI': 'AI assistant',
   'Gửi lời mời kết bạn': 'Send friend request',
   'Khách hàng này chưa là bạn bè với Zalo':
@@ -266,6 +270,9 @@ const source: Language = {
   'Tên nhóm không hợp lệ': 'Invalid group name',
   'Ưu tiên':'Priority',
   'Quản lý ứng dụng': 'App Management',
+  'Anh': 'Mr.',
+  'Chị': 'Mrs.',
+  'Anh/Chị': 'Mr./Mrs.',
   'Tìm kiếm Zalo cá nhân': 'Search Zalo Personal',
   name: 'English',
   v1: {

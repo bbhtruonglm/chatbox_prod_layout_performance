@@ -34,7 +34,7 @@
       position="BOTTOM"
       class_content="flex flex-col gap-1 max-h-[calc(100vh-100px)]"
     >
-      <OrgSetting />
+      <OrgSetting @close="attach_ref?.toggleDropdown"/>
     </Dropdown>
   </div>
 </template>
@@ -43,7 +43,6 @@ import { ref } from 'vue';
 import { useCommonStore } from '@/stores'
 
 import User from '@/components/User.vue'
-import Attach from '@/views/ChatWarper/Menu/Attach.vue';
 
 import { Squares2X2Icon } from '@heroicons/vue/24/solid';
 import Dropdown from '@/components/Dropdown.vue';
@@ -52,6 +51,6 @@ import OrgSetting from '@/components/Main/OrgSetting.vue';
 const commonStore = useCommonStore()
 
 /**ref của menu đính kèm */
-const attach_ref = ref<InstanceType<typeof Attach>>()
+const attach_ref = ref<InstanceType<typeof Dropdown>>()
 
 </script>

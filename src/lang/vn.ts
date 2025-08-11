@@ -1,8 +1,12 @@
 import type { Language } from '@/service/interface/language'
 
 const source: Language = {
-  'Trợ lý AI đã tắt. Trợ lý AI sẽ tự động bật lại sau 60 phút nữa (lúc _)':
-    'Trợ lý AI đã tắt. Trợ lý AI sẽ tự động bật lại sau 60 phút nữa (lúc {date})',
+  'Trợ lý AI đã tắt. Trợ lý AI sẽ tự động bật lại sau _ (lúc _)':
+    'Trợ lý AI đã tắt. Trợ lý AI sẽ tự động bật lại sau {duration} (lúc {date})',
+  'Trợ lý AI được tắt.': 'Trợ lý AI được tắt.',
+  'Thời gian tắt AI': 'Thời gian tắt AI',
+  'Tắt đến khi bật lại': 'Tắt đến khi bật lại',
+  'Tắt trong _ giờ': 'Tắt trong {hour} giờ',
   'Xóa nhóm _ ra khỏi Tổ chức _':
     'Xóa nhóm <b>"{group_name}"</b> ra khỏi Tổ chức <b>"{org_name}</b>"',
   'Sau khi đăng nhập Zalo trên _, vui lòng không quét mã QR đăng nhập Zalo trên phiên bản Website (https://chat.zalo.me) để làm ảnh hưởng đồng bộ tin nhắn về Bot Bán Hàng.':
@@ -67,6 +71,9 @@ const source: Language = {
   'Tên nhóm không hợp lệ':'Tên nhóm thông khó hợp lệ',
   'Ưu tiên':'Ưu tiên',
   'Quản lý ứng dụng': 'Quản lý ứng dụng',
+  'Anh': 'Anh',
+  'Chị': 'Chị',
+  'Anh/Chị': 'Anh/Chị',
   'Tìm kiếm Zalo cá nhân': 'Tìm kiếm Zalo cá nhân',
   name: 'Tiếng Việt',
   v1: {

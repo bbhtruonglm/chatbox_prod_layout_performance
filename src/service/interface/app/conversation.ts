@@ -135,6 +135,8 @@ export interface ConversationInfo {
     updatedAt?: string
     /**nội dung câu trả lời */
     ai_answer?: string
+    /** giới tính */
+    client_gender?: 'male' | 'female'
 }
 
 /**dữ liệu khách hàng dạng obj để dễ update */

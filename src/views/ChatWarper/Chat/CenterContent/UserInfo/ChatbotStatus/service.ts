@@ -35,7 +35,7 @@ export function composableService(without_watch: boolean = false) {
     /**tắt bật chatbot */
     @loadingV2(commonStore, 'is_loading_full_screen')
     @error()
-    async manageChatbot(status: boolean) {
+    async manageChatbot(status: boolean, bot_resume_after?: number) {
       // xác thực dữ liệu
       if (!conversationStore.select_conversation?.fb_page_id) return
       if (!conversationStore.select_conversation?.fb_client_id) return
@@ -46,7 +46,8 @@ export function composableService(without_watch: boolean = false) {
       const RES = await this.API.manageChatbot(
         conversationStore.select_conversation?.fb_page_id,
         conversationStore.select_conversation?.fb_client_id,
-        status
+        status,
+        bot_resume_after
       )
 
       // ghi lại dữ liệu mới
@@ -71,14 +72,31 @@ export function composableService(without_watch: boolean = false) {
         'hh:mm'
       )
 
-      /** nội dung thông báo */
-      const ALERT_MESSAGE = $t(
-        'Trợ lý AI đã tắt. Trợ lý AI sẽ tự động bật lại sau 60 phút nữa (lúc _)',
-        { date: DATE_RESUME_AT }
+      /** khoảng thời gian tắt */
+      const DURATION = $date_handle.calcDuration(
+        conversationStore.select_conversation?.bot_resume_at,
+        // so sánh với hiện tại
+        Date.now(),
+        // thêm ago vào cuối
+        { addSuffix: true }
       )
 
+      /** nội dung thông báo */
+      let alert_message = ''
+
+      // nếu khoảng thời gian là 9999 năm => tắt đến khi bật lại
+      if (DURATION?.includes('9999')) {
+        alert_message = $t('Trợ lý AI được tắt.')
+      } else {
+        /** nội dung thông báo */
+        alert_message = $t(
+          'Trợ lý AI đã tắt. Trợ lý AI sẽ tự động bật lại sau _ (lúc _)',
+          { date: DATE_RESUME_AT, duration: DURATION }
+        )
+      }
+
       // cảnh báo
-      $toast.warning(ALERT_MESSAGE, 'top-center', 3000)
+      $toast.warning(alert_message, 'top-center', 3_000)
     }
 
     /**
@@ -268,7 +286,10 @@ export function composableService(without_watch: boolean = false) {
 
   // nếu không cần lắng nghe thay đổi của khi chuyển hội thoại thì trả về hàm tính toán trạng thái thôi
   if (without_watch) {
-    return { calcStatus: $main.calcStatusNew.bind($main) }
+    return {
+      calcStatus: $main.calcStatusNew.bind($main),
+      manageChatbot: $main.manageChatbot.bind($main),
+    }
   }
 
   /** trạng thái hiện tại */

@@ -25,13 +25,21 @@
           </div>
         </button>
       </div>
-      <button
-        @click="attach_ref?.toggleDropdown"
+      <!-- <button
+        @mouseenter="attach_ref?.toggleDropdown"
         v-tooltip.right="$t('v1.view.main.dashboard.nav.menu')"
         class="rounded-lg p-2.5 group"
       >
         <Squares2X2Icon class="w-6 h-6 m-auto group-hover:text-red-600" />
-      </button>
+      </button> -->
+      <NavItem
+        :is_disable_tooltip="true"
+        @mouseover="attach_ref?.attach_ref?.mouseover"
+        @mouseleave="attach_ref?.attach_ref?.mouseleave"
+        :is_active="false"
+        :icon="Squares2X2Icon"
+        :title="$t('v1.view.main.dashboard.nav.menu')"
+      />
       <hr class="border-slate-700 w-8 mx-auto" />
       <NavItem
         id="interact"

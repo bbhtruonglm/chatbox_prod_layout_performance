@@ -10,24 +10,13 @@
       <li class="pl-2">
         {{ $t('v1.view.main.dashboard.org.pay.upgrade.price') }}
         <span
-          v-if="!is_full_year || orgStore.hasDiscount()"
           class="font-bold"
         >
           {{ content?.price }}
         </span>
-        <span
-          v-else
-          v-html="content?.price_discount"
-          class="font-bold"
-        />
       </li>
       <li
-        v-if="is_full_year && !orgStore.hasDiscount()"
-        v-html="content?.price_discount_year"
-        class="pl-2"
-      />
-      <li
-        v-if="is_full_year && orgStore.hasDiscount()"
+        v-if="is_full_year"
         v-html="content?.price_year"
         class="pl-2"
       />

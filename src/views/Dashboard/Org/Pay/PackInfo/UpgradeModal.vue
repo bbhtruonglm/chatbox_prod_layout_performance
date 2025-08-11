@@ -43,9 +43,7 @@
                   >
                     <span class="text-green-600">
                       {{
-                        $t('v1.view.main.dashboard.org.pay.upgrade.year', {
-                          discount: orgStore.hasDiscount() ? '' : '(-40%)',
-                        })
+                        $t('v1.view.main.dashboard.org.pay.upgrade.year')
                       }}
                     </span>
                   </Toggle>
@@ -108,9 +106,7 @@
                   >
                     <span class="text-green-600">
                       {{
-                        $t('v1.view.main.dashboard.org.pay.upgrade.year', {
-                          discount: orgStore.hasDiscount() ? '' : '(-20%)',
-                        })
+                        $t('v1.view.main.dashboard.org.pay.upgrade.year')
                       }}
                     </span>
                   </Toggle>

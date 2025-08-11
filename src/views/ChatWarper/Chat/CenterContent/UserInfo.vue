@@ -5,9 +5,8 @@
     class="bg-white rounded-t-lg flex-shrink-0 py-2 px-3 flex justify-between gap-3"
   >
     <div class="flex items-center gap-2.5 flex-grow min-w-0 ">
-      <BlingEffect :show_effect="isFindUid()" class="rounded-oval w-10 h-10">
+      <BlingEffect @click="client_menu_ref?.openClientInfo()" :show_effect="isFindUid()" class="rounded-oval w-10 h-10">
         <ClientAvatar
-          @click="client_menu_ref?.openClientInfo()"
           :conversation="conversationStore.select_conversation"
           class="w-10 h-10 flex-shrink-0 cursor-pointer"
         />

@@ -7,12 +7,23 @@
   >
     <HotAlert
       :codes="['ALMOST_REACH_QUOTA_AI', 'LOCK_FEATURE', 'PAGE_EXPIRED_SESSION']"
+      is_chat
       class="absolute top-3 left-1/2 -translate-x-1/2 w-2/3 z-10"
     />
+
     <Menu />
-    <LeftBar />
-    <CenterContent />
-    <RightBar />
+    <Layout>
+      <template #left>
+        <LeftBar />
+      </template>
+      <template #right>
+        <div class="flex gap-2 h-full">
+          <CenterContent />
+          <RightBar />
+        </div>
+      </template>
+    </Layout>
+
     <AlertRechQuota
       @close_modal="goDashboard"
       @confirm="goDashboard()"
@@ -28,7 +39,7 @@ import { create_token_app_installed } from '@/service/api/chatbox/n5-app'
 import {
   getCurrentOrgInfo,
   getPageInfo,
-  getPageWidget
+  getPageWidget,
 } from '@/service/function'
 import {
   listen as ext_listen,
@@ -41,7 +52,7 @@ import {
   useConversationStore,
   useExtensionStore,
   useOrgStore,
-  usePageStore
+  usePageStore,
 } from '@/stores'
 import { N4SerivceAppPage } from '@/utils/api/N4Service/Page'
 import { N5AppV1AppApp } from '@/utils/api/N5App'
@@ -65,6 +76,7 @@ import HotAlert from '@/components/HotAlert.vue'
 import CenterContent from '@/views/ChatWarper/Chat/CenterContent.vue'
 import LeftBar from '@/views/ChatWarper/Chat/LeftBar.vue'
 import RightBar from '@/views/ChatWarper/Chat/RightBar.vue'
+import Layout from '@/views/ChatWarper/Layout.vue'
 import Menu from '@/views/ChatWarper/Menu.vue'
 
 import BellSound from '@/assets/sound/notification-sound.mp3'
@@ -392,12 +404,14 @@ async function pushWebNoti(conversation?: ConversationInfo) {
 
   /**tiêu đề */
   const TITLE = conversation?.client_name || commonStore.partner?.name || ''
-  
+
   /**link avatar của khách hàng */
   const AVATAR = `https://chatbox-static-v3.botbanhang.vn/app/facebook/avatar/${conversation?.fb_client_id}?page_id=${conversation?.fb_page_id}&staff_id=${chatbotUserStore.chatbot_user?.fb_staff_id}&width=64&height=64&type=${conversation?.platform_type}`
-  
+
   /**nội dung muốn thông báo */
-  const MESSAGE_ALERT = conversation?.last_message || $t('v1.view.main.dashboard.chat.new_message_alert')
+  const MESSAGE_ALERT =
+    conversation?.last_message ||
+    $t('v1.view.main.dashboard.chat.new_message_alert')
 
   /**tạo đối tượng thông báo noti + thực hiện noti */
   const NOTI = new Notification(TITLE, { body: MESSAGE_ALERT, icon: AVATAR })

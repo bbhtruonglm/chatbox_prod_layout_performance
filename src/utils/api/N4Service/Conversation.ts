@@ -155,8 +155,9 @@ export class N4SerivceAppConversation extends N4Serivce {
   async manageChatbot(
     page_id: string,
     client_id: string,
-    is_disable: boolean
+    is_disable: boolean,
+    bot_resume_after?: number
   ): Promise<ConversationInfo> {
-    return this.post('manage_chatbot', { page_id, client_id, is_disable })
+    return this.post('manage_chatbot', { page_id, client_id, is_disable, bot_resume_after })
   }
 }

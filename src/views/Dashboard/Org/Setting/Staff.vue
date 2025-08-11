@@ -15,17 +15,33 @@
       )
     </template>
     <template #action>
-      <button
-        @click="activeStaff"
-        class="py-1 px-4 rounded-md text-sm font-medium bg-blue-600 text-white"
-      >
-        {{ $t('v1.common.more') }}
-      </button>
+      <div class="flex items-center gap-2 text-sm">
+        <div class="relative">
+          <MagnifyingGlassIcon
+            class="absolute top-0 bottom-0 left-3 m-auto size-4 text-slate-500"
+          />
+          <input
+            v-model="search_employee"
+            type="text"
+            class="border rounded-full py-1.5 pl-8 px-3 outline-none"
+            :placeholder="$t('Tìm kiếm')"
+          />
+        </div>
+        <button
+          @click="activeStaff"
+          class="py-1 px-4 rounded-md font-medium bg-blue-600 text-white"
+        >
+          {{ $t('v1.common.more') }}
+        </button>
+      </div>
     </template>
     <template #item>
-      <div class="grid gap-6 grid-cols-1 md:grid-cols-4">
+      <div
+        class="grid gap-6 grid-cols-1 md:grid-cols-4 max-h-[50dvh] overflow-auto"
+      >
         <template v-for="staff of orgStore.list_ms">
           <ActorItem
+            v-show="showEmployee(staff)"
             @click="activeMs(staff)"
             :class="{
               'opacity-50': !staff.ms_is_active,
@@ -108,6 +124,8 @@ import type { MemberShipInfo } from '@/service/interface/app/billing'
 import { ToastSingleton } from '@/utils/helper/Alert/Toast'
 import { ConfirmSingleton } from '@/utils/helper/Alert/Confirm'
 import { useI18n } from 'vue-i18n'
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
+import { nonAccentVn } from '@/service/helper/format'
 
 const orgStore = useOrgStore()
 const $member_ship_helper = SingletonMemberShipHelper.getInst()
@@ -123,11 +141,29 @@ const confirm_inactive_modal_ref = ref<InstanceType<typeof ConfirmInactive>>()
 const selected_staff = ref<MemberShipInfo>()
 /**ref của modal kết nối nền tảng */
 const connect_page_ref = ref<InstanceType<typeof ConnectPage>>()
+/** từ khóa tìm kiếm nhân sự */
+const search_employee = ref('')
 
 // nạp danh sách nhân viên khi component được mount
 onMounted(readMs)
 // nạp danh sách nhân viên khi chọn tổ chức khác
 watch(() => orgStore.selected_org_id, readMs)
+
+/** ẩn hiện nhân sự */
+function showEmployee(ms: MemberShipInfo) {
+  /** từ khóa tìm kiếm */
+  const SEARCH = nonAccentVn(search_employee.value)?.replace(/ /g, '')
+  /** tên đầy đủ của nhân sự */
+  const FULL_NAME = nonAccentVn(ms.user_info?.full_name || '')?.replace(
+    / /g,
+    ''
+  )
+  /** id của nhân sự */
+  const ID_STAFF = ms?.staff_id?.replace(/ /g, '') || ''
+
+  // nếu tên hoặc id chứa từ khóa thì hiển thị
+  return FULL_NAME.includes(SEARCH) || ID_STAFF.includes(SEARCH)
+}
 
 /**kích hoạt nhân viên đang chờ */
 async function activeMs(staff: MemberShipInfo) {
@@ -210,7 +246,7 @@ async function readMs() {
     // ghi đè lại tổng số nhân viên hiện tại
     if (orgStore.selected_org_info?.org_package)
       orgStore.selected_org_info.org_package.org_current_staff =
-      orgStore.list_ms?.filter(ms => ms?.ms_is_active).length
+        orgStore.list_ms?.filter(ms => ms?.ms_is_active).length
   } catch (e) {
     // thông báo lỗi
     toastError(e)

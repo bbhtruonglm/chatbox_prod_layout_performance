@@ -1,5 +1,5 @@
 <template>
-  <Dropdown
+  <Popover
     ref="attach_ref"
     :is_fit="false"
     width="349px"
@@ -51,7 +51,7 @@
     </MenuItem>
     <hr class="my-1" v-if="orgStore.isAdminOrg()" />
     <OrgSetting />
-  </Dropdown>
+  </Popover>
 </template>
 
 <script setup lang="ts">
@@ -62,6 +62,7 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
+import Popover from '@/components/Popover.vue'
 import Dropdown from '@/components/Dropdown.vue'
 import MenuItem from '@/components/Main/Dashboard/MenuItem.vue'
 import MenuTitle from '@/components/Main/Dashboard/MenuTitle.vue'
@@ -83,12 +84,13 @@ const conversationStore = useConversationStore()
 const $external_site = container.resolve(ExternalSite)
 
 /**ref của menu đính kèm */
-const attach_ref = ref<InstanceType<typeof Dropdown>>()
+const attach_ref = ref<InstanceType<typeof Popover>>()
 
 /**ẩn hiện menu */
-function toggleDropdown($event?: MouseEvent) {
-  attach_ref.value?.toggleDropdown($event)
-}
+// function toggleDropdown($event?: MouseEvent) {
+//   attach_ref.value?.toggleDropdown($event)
+// }
 
-defineExpose({ toggleDropdown })
+// defineExpose({ toggleDropdown })
+defineExpose({ attach_ref })
 </script>

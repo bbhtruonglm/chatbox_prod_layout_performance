@@ -15,21 +15,37 @@
       )
     </template>
     <template #action>
-      <button
-        @click="openAddPageModal"
-        class="py-1 px-4 rounded-md text-sm font-medium bg-blue-600 text-white"
-      >
-        {{ $t('v1.common.more') }}
-      </button>
+      <div class="flex items-center gap-2 text-sm">
+        <div class="relative">
+          <MagnifyingGlassIcon
+            class="absolute top-0 bottom-0 left-3 m-auto size-4 text-slate-500"
+          />
+          <input
+            v-model="search_page"
+            type="text"
+            class="border rounded-full py-1.5 pl-8 px-3 outline-none"
+            :placeholder="$t('Tìm kiếm')"
+          />
+        </div>
+        <button
+          @click="openAddPageModal"
+          class="py-1 px-4 rounded-md font-medium bg-blue-600 text-white"
+        >
+          {{ $t('v1.common.more') }}
+        </button>
+      </div>
     </template>
     <template #item>
-      <div class="grid gap-6 grid-cols-1 md:grid-cols-4">
+      <div
+        class="grid gap-6 grid-cols-1 md:grid-cols-4 max-h-[50dvh] overflow-auto"
+      >
         <template v-for="os of orgStore.list_os">
           <PageItem
             v-if="os?.page_info"
             :page_info="os?.page_info"
             :checkbox_is_visible="false"
             class="cursor-pointer"
+            v-show="showPage(os?.page_info)"
           >
             <template #after-name>
               <div
@@ -61,24 +77,25 @@
   />
 </template>
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import { useOrgStore } from '@/stores'
 import { read_os } from '@/service/api/chatbox/billing'
 import { toastError } from '@/service/helper/alert'
+import { nonAccentVn } from '@/service/helper/format'
+import { useOrgStore } from '@/stores'
+import { remove } from 'lodash'
+import { onMounted, ref, watch } from 'vue'
 
 import CardItem from '@/components/Main/Dashboard/CardItem.vue'
 import PageItem from '@/components/Main/Dashboard/PageItem.vue'
 
-import ConfirmInactive from '@/views/Dashboard/Org/Setting/Page/ConfirmInactive.vue'
 import ConnectPage from '@/views/Dashboard/ConnectPage.vue'
+import ConfirmInactive from '@/views/Dashboard/Org/Setting/Page/ConfirmInactive.vue'
 
-import StackIcon from '@/components/Icons/Stack.vue'
-import MinusOutlineIcon from '@/components/Icons/MinusOutline.vue'
 import MinusIcon from '@/components/Icons/Minus.vue'
+import MinusOutlineIcon from '@/components/Icons/MinusOutline.vue'
+import StackIcon from '@/components/Icons/Stack.vue'
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 
-import type { IPage, PageInfo } from '@/service/interface/app/page'
-import type { OwnerShipInfo } from '@/service/interface/app/billing'
-import { remove } from 'lodash'
+import type { IPage } from '@/service/interface/app/page'
 
 const orgStore = useOrgStore()
 
@@ -90,11 +107,26 @@ const selected_page = ref<IPage>()
 // const list_os = ref<OwnerShipInfo[]>()
 /**ref của modal kết nối nền tảng */
 const connect_page_ref = ref<InstanceType<typeof ConnectPage>>()
+/** từ khóa tìm kiếm trang */
+const search_page = ref('')
 
 // nạp dữ liệu trang khi component được mount
 onMounted(getOs)
 // nạp dữ liệu trang khi tổ chức được chọn
 watch(() => orgStore.selected_org_id, getOs)
+
+/** ẩn hiện trang */
+function showPage(page: IPage) {
+  /** từ khóa tìm kiếm */
+  const SEARCH = nonAccentVn(search_page.value)?.replace(/ /g, '')
+  /** tên page */
+  const FULL_NAME = nonAccentVn(page?.alias || page?.name || '')?.replace(/ /g, '')
+  /** id của page */
+  const ID_PAGE = page?.fb_page_id?.replace(/ /g, '') || ''
+  
+  // nếu tên hoặc id chứa từ khóa thì hiển thị
+  return FULL_NAME.includes(SEARCH) || ID_PAGE.includes(SEARCH)
+}
 
 /**chuẩn bị huỷ kích hoạt trang */
 function prepareInactivePage(page?: IPage) {

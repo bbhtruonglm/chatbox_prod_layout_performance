@@ -1,72 +1,76 @@
 <template>
   <div
-    v-if="is_loading"
+    v-if="is_loading && !is_loading_first"
     class="relative"
   >
     <div class="absolute left-1/2 -translate-x-1/2">
       <Loading class="mx-auto" />
     </div>
   </div>
-  <RecycleScroller
-    @scroll="($event: UIEvent) => $main.loadMoreConversation($event)"
-    v-if="size(conversationStore.conversation_list)"
-    class="overflow-y-auto"
-    :items="map(conversationStore.conversation_list)"
-    :item-size="78"
-    key-field="data_key"
-    v-slot="{ item }"
-  >
-    <ConversationItem :source="item" />
-  </RecycleScroller>
-  <div v-else>
-    <img
-      src="@/assets/icons/empty-page.svg"
-      width="250"
-      class="mx-auto mt-5"
-    />
-    <div class="text-center text-slate-400">
-      {{ $t('v1.view.main.dashboard.chat.empty_conversation') }}
+  <SkeletonLoading v-if="is_loading_first" />
+  <template v-if="!is_loading_first">
+    <RecycleScroller
+      @scroll="($event: UIEvent) => $main.loadMoreConversation($event)"
+      v-if="size(conversationStore.conversation_list)"
+      class="overflow-y-auto"
+      :items="map(conversationStore.conversation_list)"
+      :item-size="78"
+      key-field="data_key"
+      v-slot="{ item }"
+    >
+      <ConversationItem :source="item" />
+    </RecycleScroller>
+    <div v-else>
+      <img
+        src="@/assets/icons/empty-page.svg"
+        width="250"
+        class="mx-auto mt-5"
+      />
+      <div class="text-center text-slate-400">
+        {{ $t('v1.view.main.dashboard.chat.empty_conversation') }}
+      </div>
     </div>
-  </div>
+  </template>
 </template>
 <script setup lang="ts">
-import { RecycleScroller } from 'vue-virtual-scroller'
-import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { debounce, find, keys, map, mapValues, pick, set, size } from 'lodash'
 import {
   read_conversation,
   reset_read_conversation,
 } from '@/service/api/chatbox/n4-service'
-import { flow } from '@/service/helper/async'
+import { selectConversation, setParamChat } from '@/service/function'
+import { toastError } from '@/service/helper/alert'
 import {
-  useConversationStore,
-  useCommonStore,
-  usePageStore,
   useChatbotUserStore,
+  useCommonStore,
+  useConversationStore,
   useMessageStore,
   useOrgStore,
+  usePageStore,
 } from '@/stores'
-import { toastError } from '@/service/helper/alert'
-import { useRoute, useRouter } from 'vue-router'
-import { selectConversation, setParamChat } from '@/service/function'
+import { N4SerivceAppConversation } from '@/utils/api/N4Service/Conversation'
+import { error } from '@/utils/decorator/Error'
+import { loadingV2 } from '@/utils/decorator/Loading'
 import { waterfall } from 'async'
+import { differenceInHours } from 'date-fns'
+import { find, keys, map, mapValues, pick, set, size } from 'lodash'
+import { container } from 'tsyringe'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { RecycleScroller } from 'vue-virtual-scroller'
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
 
 import Loading from '@/components/Loading.vue'
 import ConversationItem from '@/views/ChatWarper/Chat/LeftBar/Conversation/ConversationItem.vue'
+import SkeletonLoading from '@/views/ChatWarper/Chat/LeftBar/Conversation/SkeletonLoading.vue'
 
-import type { CbError } from '@/service/interface/function'
-import type {
-  ConversationList,
-  ConversationInfo,
-  FilterConversation,
-} from '@/service/interface/app/conversation'
 import type { SocketEvent } from '@/service/interface/app/common'
-import { differenceInHours } from 'date-fns'
-import { loadingV2 } from '@/utils/decorator/Loading'
-import { container } from 'tsyringe'
-import { N4SerivceAppConversation } from '@/utils/api/N4Service/Conversation'
-import { error } from '@/utils/decorator/Error'
+import type {
+  ConversationInfo,
+  ConversationList,
+  FilterConversation,
+  QueryConversationResponse,
+} from '@/service/interface/app/conversation'
+import type { CbError } from '@/service/interface/function'
 import {
   CalcSpecialPageConfigs,
   type ICalcSpecialPageConfigs,
@@ -93,6 +97,8 @@ const orgStore = useOrgStore()
 
 /**có đang load hội thoại hay không */
 const is_loading = ref(false)
+/** load danh sách hội thoại mới */
+const is_loading_first = ref(true)
 /**toàn bộ hội thoại đã được load hết chưa */
 const is_done = ref(false)
 /**phân trang kiểu after */
@@ -153,6 +159,9 @@ class Main {
   @loadingV2(is_loading, 'value')
   @error()
   async getConversation(is_first_time?: boolean, is_pick_first?: boolean) {
+    /** lưu trạng thái có phải load lần đầu không */
+    is_loading_first.value = !!is_first_time
+
     // nếu đang mất mạng thì không cho gọi api
     if (!commonStore.is_connected_internet) return
 
@@ -190,26 +199,36 @@ class Main {
         )
     }
 
-    /**lấy dữ liệu hội thoại */
-    const RES = await this.API_CONVERSATION.readConversations(
-      PAGE_IDS,
-      {
-        ...conversationStore.option_filter_page_data,
-        ...OVERWRITE_FILTER,
-      },
-      40,
-      SORT,
-      after.value
-    )
+    /** dữ liệu hội thoại */
+    let res: QueryConversationResponse
+
+    try {
+      // lấy dữ liệu hội thoại
+      res = await this.API_CONVERSATION.readConversations(
+        PAGE_IDS,
+        {
+          ...conversationStore.option_filter_page_data,
+          ...OVERWRITE_FILTER,
+        },
+        40,
+        SORT,
+        after.value
+      )
+    } catch (e) {
+      throw e
+    } finally {
+      // tắt loading lần đầu
+      is_loading_first.value = false
+    }
 
     /**dữ liệu hội thoại */
-    const CONVERSATIONS = RES.conversation
+    const CONVERSATIONS = res.conversation
 
     // gắn cờ nếu đã hết dữ liệu
-    if (!size(CONVERSATIONS) || !RES.after) is_done.value = true
+    if (!size(CONVERSATIONS) || !res.after) is_done.value = true
 
     // lưu lại after mới
-    after.value = RES.after
+    after.value = res.after
 
     // format dữ liệu trả về
     mapValues(CONVERSATIONS, (conversation, key) => {
@@ -234,7 +253,6 @@ class Main {
   /**
    * đếm số lượng hội thoại
    */
-  @loadingV2(is_loading, 'value')
   @error()
   async countConversation(conversation_type: 'CHAT' | 'POST') {
     // nếu đang mất mạng thì không cho gọi api

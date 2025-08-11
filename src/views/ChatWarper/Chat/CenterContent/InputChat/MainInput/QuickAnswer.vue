@@ -371,7 +371,6 @@ async function transalate() {
     // check lại nếu không có nội dung thì thôi
     if (!text) throw 'DONE'
 
-
     // gọi api dịch
     const RES = await text_translate({
       from: 'vn',
@@ -482,12 +481,13 @@ function replaceTemplateMessage(content: string) {
     .replace(/#{{LAST_NAME}}/g, '')
     .replace(/#{{STAFF_FIRST_NAME}}/g, '')
     .replace(/#{{STAFF_LAST_NAME}}/g, '')
-    .replace(/#SEX\{\{[^|}]+\|[^|}]+\|[^|}]+\}\}/g, '')
+    // .replace(/#SEX\{\{[^|}]+\|[^|}]+\|[^|}]+\}\}/g, '')
     .replace(/#\{\{[^|}]+\|[^|}]+\|[^|}]+\}\}/g, '')
     .replace(/#\{\{TODAY\{[^}]+\}\}\}/g, '')
 
   /**tên khách hàng */
-  const CLIENT_NAME = CONVERSATION?.client_origin_name || CONVERSATION?.client_name || ''
+  const CLIENT_NAME =
+    CONVERSATION?.client_origin_name || CONVERSATION?.client_name || ''
   /**tên nhân viên */
   const STAFF_NAME =
     getStaffInfo(page_id.value, CONVERSATION?.fb_staff_id)?.name || ''
@@ -519,8 +519,40 @@ function replaceTemplateMessage(content: string) {
       // tên trang
       .replace(/#{PAGE_NAME}/g, PAGE_NAME)
       .replace(/#{{PAGE_NAME}}/g, PAGE_NAME)
+
+      // giới tính
+      .replace(
+        /#SEX\{\{([^|}]+)\|([^|}]+)\|([^|}]+)\}\}/g,
+        (_, male, female, unknown) =>
+          getGender(CONVERSATION?.client_gender, male, female, unknown)
+      )
+      .replace(/#SEX\{[^|}]+\|[^|}]+\|[^|}]+\}/g, (_, male, female, unknown) =>
+        getGender(CONVERSATION?.client_gender, male, female, unknown)
+      )
   )
 }
+
+/**
+ * hàm lấy xưng hô theo giới tính
+ * @param gender giới tính của khách
+ * @param male xưng hô nam
+ * @param female xưng hô nữ
+ * @param unknown xưng hô khi không rõ giới tinh
+ */
+function getGender(
+  gender: 'male' | 'female' | undefined,
+  male: string,
+  female: string,
+  unknown: string
+) {
+  // nếu là giới tính nam
+  if (gender === 'male') return male
+  // nếu là giới tính nữ
+  if (gender === 'female') return female
+  // nếu là không rõ giới tính
+  return unknown
+}
+
 /**cuộn tới vị trí trả lời nhanh đang chọn */
 function scrollIntoView(id: string) {
   /**

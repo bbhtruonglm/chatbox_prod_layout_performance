@@ -40,9 +40,14 @@ const { t: $t } = useI18n()
 const $router = useRouter()
 const orgStore = useOrgStore()
 
+const $emit = defineEmits(['close'])
+
 /**mở menu */
 function redirectMenu(path: string) {
   // chuyển đến trang
   $router.push(`/dashboard/${path}`)
+
+  // emit sự kiện đóng dropdown ra ngoài
+  $emit('close')
 }
 </script>

@@ -51,6 +51,9 @@ const $props = withDefaults(
   defineProps<{
     /**các dạng noti muốn hiển thị */
     codes: string[]
+
+    /** kiểm tra có phải đang ở màn chat hay không */
+    is_chat?: boolean
   }>(),
   {}
 )
@@ -172,6 +175,12 @@ async function getNoti() {
       { $exists: false },
       $props.codes
     )
+
+    // nếu trong chat thì sau 3s thì xóa thông báo
+    if (!$props.is_chat) return
+    setTimeout(() => {
+      list_noti.value = []
+    }, 2_000)
   } catch (e) {
     // thông báo lỗi
     // ToastSingleton.getInst().error(e)
