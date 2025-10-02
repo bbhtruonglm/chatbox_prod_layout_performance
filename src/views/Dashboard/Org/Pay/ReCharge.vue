@@ -790,8 +790,8 @@ async function createTxn() {
     const AMOUNT = Number(amount.value)
     // const AMOUNT = 4000
     // kiểm tra số tiền nạp có hợp lệ không
-    // if (!AMOUNT || AMOUNT < 50000 || AMOUNT > 250000000)
-    if (!AMOUNT || AMOUNT > 250000000)
+    if (!AMOUNT || AMOUNT < 50000 || AMOUNT > 250000000)
+      // if (!AMOUNT || AMOUNT > 250000000)
       throw $t('v1.view.main.dashboard.org.pay.recharge.amount_description')
 
     /**lấy thông tin ví hiện tại */
