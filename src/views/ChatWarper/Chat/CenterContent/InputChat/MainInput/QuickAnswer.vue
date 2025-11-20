@@ -393,74 +393,89 @@ async function getQuickAnswer() {
  * - Nếu input chứa space → coi như không search, đóng modal
  * - Nếu input viết liền → gọi debounce search
  *
- * @param inputValue Chuỗi nhập từ người dùng
+ * @param input_value Chuỗi nhập từ người dùng
  */
-function seachQuickAnswer(inputValue: string) {
-  /** 1️⃣ Nếu input có space → đóng modal Quick Answer */
-  if (inputValue.includes(' ')) {
-    commonStore.is_show_quick_answer = false
-    return
-  }
-
+function seachQuickAnswer(input_value: string) {
   /** 2️⃣ Nếu input viết liền → gọi debounce search */
-  DEBOUNCE_SEARCH(inputValue)
+  DEBOUNCE_SEARCH(input_value)
 }
 
 /**
- * Debounce để tránh gọi API quá nhiều lần khi gõ
- * - Delay mặc định: 300ms
+ * Debounce search Quick Answer
+ * - Giảm thiểu số lần gọi API khi người dùng gõ
+ * - Delay 300ms
  */
-const DEBOUNCE_SEARCH = debounce(async (searchValue: string) => {
-  /** Nếu không có page_id hoặc searchValue rỗng → bỏ qua */
-  if (!page_id.value || !searchValue) return
+const DEBOUNCE_SEARCH = debounce(async (search_value: string) => {
+  /** 1️⃣ Nếu chưa có page_id hoặc search_value rỗng → bỏ qua */
+  if (!page_id.value || !search_value) return
 
-  /** 2a️⃣ Tìm kiếm local cache trước */
+  /** 2️⃣ Lấy danh sách Quick Answer từ cache */
   let cached_list = CACHE_LIST_ANSWER.get(page_id.value) || []
 
-  /** Filter các item trong cache chứa keyword (bỏ dấu + lowercase) */
+  /** 2a. Lọc danh sách cache theo keyword (bỏ dấu + lowercase) */
   let filtered = cached_list.filter(answer =>
-    nonAccentVn(answer.title || '').includes(nonAccentVn(searchValue))
+    nonAccentVn(answer.title || '').includes(nonAccentVn(search_value))
   )
 
   if (filtered.length) {
-    /** Nếu tìm thấy trong cache → hiển thị modal Quick Answer */
+    /** 3️⃣ Nếu có kết quả trong cache → hiển thị */
     list_answer.value = filtered
-    commonStore.is_show_quick_answer = true
 
-    /** Chọn mặc định Quick Answer nếu có */
+    /** ✅ Mở modal nếu đang đóng */
+    if (!commonStore.is_show_quick_answer) {
+      commonStore.is_show_quick_answer = true
+      await nextTick() // chờ DOM update
+      changeModalPosition() // cập nhật vị trí modal
+    }
+
+    /** Chọn Quick Answer mặc định */
     setDefaultQuickAnswer()
   } else {
-    /** 2b️⃣ Nếu cache không có → gọi API search */
+    /** 4️⃣ Nếu cache không có → gọi API search */
     try {
+      is_loading.value = true // bật loading
+
+      /** Gọi API search Quick Answer */
       const API_RESULT = await new QuickAnswer(page_id.value).readAnswer(
         0, // offset
         MAX_ANSWER, // số lượng trả về tối đa
-        searchValue // keyword search
+        search_value // keyword search
       )
-      /** API result có data thì xử lý */
+
       if (API_RESULT?.length) {
-        /** Nếu API trả về kết quả → hiển thị modal + cập nhật cache */
+        /** 4a. Nếu API trả về dữ liệu → hiển thị modal và cập nhật cache */
         list_answer.value = API_RESULT
-        /** Bật cờ hiện modal quick answer */
-        commonStore.is_show_quick_answer = true
-        /** set giá trị mặc định */
+
+        /** ✅ Mở modal nếu đang đóng */
+        if (!commonStore.is_show_quick_answer) {
+          commonStore.is_show_quick_answer = true
+          await nextTick()
+          changeModalPosition()
+        }
+
+        /** Chọn mặc định Quick Answer */
         setDefaultQuickAnswer()
-        /** Lưu giá trị cache */
+
+        /** Cập nhật cache cho lần search tiếp theo */
         CACHE_LIST_ANSWER.set(page_id.value, API_RESULT)
       } else {
-        /** 2c️⃣ Nếu API cũng không có dữ liệu → đóng modal sau 0.5s */
+        /** 4b. Nếu API không có kết quả → xóa danh sách sau 0.5s */
         setTimeout(() => {
-          commonStore.is_show_quick_answer = false
+          /** commonStore.is_show_quick_answer = false // giữ modal có thể mở bằng input khác */
+          list_answer.value = []
         }, NO_RESULT_CLOSE_DELAY)
       }
     } catch (e) {
-      /** Nếu API lỗi → đóng modal sau 0.5s */
+      /** 4c. Nếu API lỗi → vẫn giữ modal, có thể reset sau delay */
       setTimeout(() => {
-        commonStore.is_show_quick_answer = false
+        /** commonStore.is_show_quick_answer = false */
       }, NO_RESULT_CLOSE_DELAY)
+    } finally {
+      /** 5️⃣ Tắt loading */
+      is_loading.value = false
     }
   }
-}, 300) // delay debounce 300ms
+}, 300) // Delay debounce 300ms
 
 /**focus vào input chat */
 function focusChat() {
