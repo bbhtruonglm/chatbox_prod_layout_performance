@@ -21,7 +21,11 @@ export class QuickAnswer extends Widget {
     this.#PAGE_ID = page_id
   }
 
-  /**đọc dữ liệu trả lời nhanh */
+  /**đọc dữ liệu trả lời nhanh
+   * @param skip số bản ghi bỏ qua
+   * @param limit số bản ghi lấy về
+   * @param search từ khóa tìm kiếm
+   */
   async readAnswer(
     skip: number,
     limit: number,
