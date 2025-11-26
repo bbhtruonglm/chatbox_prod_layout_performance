@@ -11,7 +11,7 @@
     </template>
 
     <template #body>
-      <div class="flex gap-2 overflow-hidden">
+      <div class="flex gap-2 overflow-hidden h-full">
         <div class="bg-white h-full w-1/2 rounded-md p-2 flex flex-col gap-2">
           <!-- Search member -->
           <div class="relative">
@@ -229,7 +229,10 @@ import {
   usePageStore,
 } from '@/stores'
 import { N13ZaloPersonal } from '@/utils/api/N13ZaloPersonal'
-import { N4SerivceAppConversation } from '@/utils/api/N4Service/Conversation'
+import {
+  N4SerivceAppConversation,
+  N4SerivceAppMessage,
+} from '@/utils/api/N4Service/Conversation'
 import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { keys } from 'lodash'
 
@@ -239,11 +242,13 @@ import type {
   AttachmentInfo,
   MessageInfo,
 } from '@/service/interface/app/message'
+
 /** Stores quản lý org và page */
 const orgStore = useOrgStore()
 const pageStore = usePageStore()
 const conversationStore = useConversationStore()
 const { message_data } = storeToRefs(useMessageStore())
+const API_MESSAGE = container.resolve(N4SerivceAppMessage)
 
 const sending_media = ref<AttachmentInfo[]>([])
 
@@ -441,44 +446,32 @@ const FILTERED_CONVERSATION = computed(() => {
  * Xử lý tạo group trên Zalo
  */
 async function shareMessage() {
-  /** Reset lỗi */
-  error_group_name.value = false
-  error_select_members.value = ''
-
-  /** Kiểm tra tên group */
-  if (!group_name.value.trim()) {
-    error_group_name.value = true
-    return
-  }
-  /** Kiểm tra số lượng thành viên */
-  if (selected_members.value.length < 2) {
-    error_select_members.value = 'Vui lòng chọn ít nhất 2 thành viên'
-    return
-  }
-
   /** Lấy page_id mặc định (page đầu tiên) */
   const PAGE_IDS = keys(pageStore.selected_page_id_list)
   const page_id = PAGE_IDS[0] || ''
+  /** Lấy list page */
+  const LIST = orgStore.list_os || []
+  /** lấy page trùng với page hiện tại */
+  const PAGE = LIST.find(p => p.page_id === page_id)
 
-  /** Payload gửi lên API Zalo */
-  const PAYLOAD = {
-    group_name: group_name.value.trim(),
-    member_ids: selected_members.value.map(m => m.fb_client_id),
-    page_id,
+  /** Lặp qua danh sách thành viên đã chọn */
+  for (const member of selected_members.value) {
+    try {
+      /** Gọi API gửi tin nhắn */
+      await API_MESSAGE.sendMessage(
+        page_id,
+        member.fb_client_id,
+        sending_message.value || '',
+        PAGE?.org_id || ''
+      )
+    } catch (err) {
+      console.error('Lỗi khi chia sẻ tin nhắn:', err)
+    }
   }
 
-  try {
-    /** Gọi API tạo group */
-    // const DATA = await API_ZALO.createGroupZalo(PAYLOAD)
-    // console.log('Tạo group thành công:', DATA)
-
-    /** Reset UI sau khi tạo thành công */
-    group_name.value = ''
-    selected_members.value = []
-    modal_widget__group_share_ref.value?.toggleModal()
-  } catch (err) {
-    console.error('Lỗi khi tạo group:', err)
-  }
+  /** Reset UI sau khi gửi thành công */
+  modal_widget__group_share_ref.value?.toggleModal()
+  selected_members.value = []
 }
 
 /**

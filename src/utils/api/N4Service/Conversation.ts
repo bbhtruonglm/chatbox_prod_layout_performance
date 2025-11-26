@@ -198,4 +198,53 @@ export class N4SerivceAppMessage extends N4Serivce {
 
     return RES
   }
+  /**
+   * gửi emoji vào hội thoại
+   * @param page_id id trang
+   * @param client_id id khách hàng
+   * @param message nội dung tin nhắn
+   * @param message_mid id tin nhắn
+   * @param org_id id tổ chức
+   */
+  async sendReplyMessage(
+    page_id: string,
+    client_id: string,
+    message: string,
+    message_mid: string,
+    org_id: string
+  ): Promise<any> {
+    /**dữ liệu hội thoại */
+    const RES: QueryConversationResponse = await this.post('send_message', {
+      org_id,
+      page_id: page_id,
+      client_id,
+      reply_to: {
+        mid: message_mid,
+      },
+      text: message,
+    })
+
+    return RES
+  }
+
+  /**
+   * gửi tin nhắn đến khách hàng
+   * @param page_id id trang
+   * @param client_id id khách hàng
+   * @param message nội dung tin nhắn
+   * @param org_id id tổ chức
+   */
+  async sendMessage(
+    page_id: string,
+    client_id: string,
+    message: string,
+    org_id: string
+  ): Promise<any> {
+    return this.post('send_message', {
+      org_id,
+      page_id,
+      client_id,
+      text: message,
+    })
+  }
 }

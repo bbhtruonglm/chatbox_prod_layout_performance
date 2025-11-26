@@ -2,7 +2,7 @@
   <div
     id="chat__message-reaction"
     class="text-xxs text-slate-500 absolute group w-max z-20 -top-2.5 px-1"
-    :class="sender_id === fb_page_id ? '-left-[64px]' : '-right-[64px]'"
+    :class="sender_id === fb_page_id ? '-left-[52px]' : '-right-[52px]'"
   >
     <!-- Trigger icon -->
     <!-- :class="[
@@ -11,19 +11,18 @@
           : 'px-3 py-1 bg-white border border-slate-200 rounded-full',
       ]" -->
     <span
-      class="flex items-center justify-center cursor-pointer text-base rounded-full relative opacity-0 group-hover:opacity-100 transition-opacity duration-150 px-3 py-0.5 bg-white border border-slate-200 rounded-full"
+      class="flex items-center justify-center cursor-pointer text-base rounded-full relative opacity-0 group-hover:opacity-100 transition-opacity duration-150 px-1 py-0.5 bg-white rounded-full shadow"
       @mouseenter="openReactions"
       @mouseleave="closeReactions"
       ref="trigger_icon"
     >
       <!-- Nếu đã chọn reaction, hiện emoji UTF-8, ngược lại Lucide icon -->
-      <!-- <span
-        v-if="selected_reaction"
-        class="text-sm flex items-center justify-center gap-1"
+      <span
+        class="text-sm flex items-center justify-center gap-1 size-4 py-0.5"
       >
-        {{ selected_reaction.map(r => r.icon).join(' ') }}
-      </span> -->
-      <ThumbsUpIcon class="size-3 text-blue-500" />
+        {{ MAIN_REACTIONS[0].icon }}
+      </span>
+      <!-- <ThumbsUpIcon class="size-3 text-blue-500" /> -->
 
       <!-- Reaction popup: hiện khi hover trigger icon -->
       <div
@@ -147,6 +146,7 @@ function updatePopupPosition() {
  * - Nếu gỡ hết → reset về null
  */
 async function selectReaction(reaction: Reaction) {
+  /** call api gửi reaction */
   await new N4SerivceAppMessage().sendReaction(
     $props.fb_page_id || '',
     $route.query.user_id?.toString() || '',
