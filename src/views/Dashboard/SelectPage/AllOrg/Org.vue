@@ -93,6 +93,7 @@ const active_page_list = defineModel<PageData[]>('active_page_list')
 
 /** danh sách các page thuộc tổ chức hiện tại */
 const page_of_current_org = computed(() => {
+  // console.log(pageStore.active_page_list, 'active_page_list')
   return pickBy(pageStore.active_page_list, page => {
     return $main.isInCurrentOrg(page)
   })
@@ -111,6 +112,7 @@ const filter_page_list = computed(() => {
 class Main {
   /**sắp xếp page gắn sao lên đầu */
   getListPage() {
+    // console.log(filter_page_list.value, 'filter_page_list')
     // lọc ra các page thuộc về nhóm này
     active_page_list.value = sortListPage(filter_page_list.value)
   }

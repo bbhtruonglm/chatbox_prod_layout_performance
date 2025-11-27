@@ -71,7 +71,7 @@ export function usePageManager() {
         org_id,
         orgStore.selected_org_group[orgStore.selected_org_id || '']
       )
-      console.log(RES, 'ressssss')
+
       pageStore.active_page_list = RES?.page_list || {}
     }
     /**có hiển thị các nút của trang chọn page không */
@@ -98,7 +98,7 @@ export function usePageManager() {
       // const PAGE_DATA = await new N4SerivceAppPage().getListPage({})
 
       // nếu không có dữ liệu trang thì thôi
-      if (isEmpty(PAGE_DATA_2)) return
+      // if (isEmpty(PAGE_DATA_2)) return
 
       // lưu trữ dữ liệu trang
       // pageStore.all_page_list = PAGE_DATA?.page_list || {}
