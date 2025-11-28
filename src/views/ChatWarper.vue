@@ -235,7 +235,7 @@ function initExtensionLogic() {
       // nạp thông tin khách hàng
       if (r?.info) {
         // nếu có thông tin khách hàng thì bật cờ có thông tin mới lên
-        if(conversationStore.select_conversation) {
+        if (conversationStore.select_conversation) {
           conversationStore.select_conversation.has_new_info_from_ext = true
         }
 
@@ -626,7 +626,7 @@ class Main {
     // nạp lại dữ liệu của tổ chức hiện tại đang chọn cho chắc
     getCurrentOrgInfo()
 
-    // nếu vẫn không có tổ chức thì thôi
+    /** nếu vẫn không có tổ chức thì thôi */
     if (!orgStore.selected_org_id)
       throw $t('v1.view.main.dashboard.chat.error.get_org_info')
 
@@ -674,7 +674,7 @@ class Main {
   }
 
   /**đánh dấu xem tổ chức này có page zalo không */
-  markOrgHaveZalo(oss: OwnerShipInfo[]){
+  markOrgHaveZalo(oss: OwnerShipInfo[]) {
     /**lọc ra các trang zalo cá nhân */
     pageStore.zlp_oss = oss.filter(
       os => os?.page_info?.type === 'ZALO_PERSONAL'
