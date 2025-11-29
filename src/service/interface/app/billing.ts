@@ -150,7 +150,7 @@ export interface MemberShipInfo {
   ms_role?: 'ADMIN' | 'STAFF'
   /**nhân viên đã được kích hoạt chưa */
   ms_is_active?: boolean
-  /**thời gian tạo */
+  /** thời gian tạo */
   createdAt?: string
 }
 
