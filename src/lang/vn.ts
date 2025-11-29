@@ -24,7 +24,6 @@ const source: Language = {
   "Trả lời từ _. Sử dụng '/' để trả lời nhanh.":
     "Trả lời từ {name}. Sử dụng '/' để trả lời nhanh.",
 
-  'add _ member': 'Thêm {count} thành viên',
   'Bình luận dưới tên _': 'Bình luận dưới tên {name}',
   'Bình luận với vai trò _': 'Bình luận với vai trò {name}',
   'Đối với tài khoản _': 'Đối với tài khoản {name}',
@@ -100,6 +99,9 @@ const source: Language = {
   'Giới tính': 'Giới tính',
   'Không xác định': 'Không xác định',
   name: 'Tiếng Việt',
+  'Kết nối với Tiktok': 'Kết nối với Tiktok',
+  'Kết nối với Tiktok để chat nhiều Trang tự động với AI, tối ưu chi phí Marketing với CAPI, tự động tích hợp các ứng dụng của Doanh nghiệp.':
+    'Kết nối với Tiktok để chat nhiều Trang tự động với AI, tối ưu chi phí Marketing với CAPI, tự động tích hợp các ứng dụng của Doanh nghiệp.',
   v1: {
     common: {
       zalo: 'Zalo',
@@ -133,6 +135,7 @@ const source: Language = {
       select_all: 'Chọn tất cả',
       active: 'Kích hoạt',
       chatbox: 'Chatbox',
+
       add_customer: 'Thêm khách hàng',
       create_new_group: 'Tạo nhóm mới',
       search_member: 'Tìm kiếm thành viên',
@@ -181,6 +184,7 @@ const source: Language = {
       reset_token_confirm:
         'Bạn có chắc chắn muốn thay đổi mã truy cập không. Điều này sẽ làm các api đang hoạt động bị dừng lại?',
       create_new_token: 'Tạo mã bí mật mới',
+      tiktok: 'Tiktok',
     },
     view: {
       network: {
@@ -443,6 +447,7 @@ const source: Language = {
             empty_page: 'Không tìm thấy trang của bạn?',
             add_page: 'Thêm kết nối',
             active_page: 'Kích hoạt trang',
+
             empty_invite: 'Không có trang cần kích hoạt',
             accept: 'Xác nhận lời mời',
             denied: 'Từ chối lời mời',
