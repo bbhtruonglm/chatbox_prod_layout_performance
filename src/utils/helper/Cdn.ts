@@ -82,10 +82,6 @@ export class Cdn implements ICdn {
     return `${this.HOST}/media/s/${user_id}/user`
   }
   tiktokClientAvt(page_id?: string, client_id?: string) {
-    console.log(
-      `${this.HOST}/media/tiktok/${page_id}/client/${client_id}`,
-      'eheheheeh'
-    )
     return `${this.HOST}/media/tiktok/${page_id}/client/${client_id}`
   }
   fbClientAvt(page_id?: string, client_id?: string) {
