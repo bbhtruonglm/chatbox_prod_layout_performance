@@ -4,8 +4,8 @@
 npm run build-staging
 
 # đẩy code build lên server
-rsync -avz dist ubuntu@34.142.177.104:/tmp/
+rsync -avz dist botx.dev.minh:/tmp/
 
 # di chuyển code build vào thư mục nginx
-ssh ubuntu@34.142.177.104 \
+ssh botx.dev.minh \
 'sudo rm -rf /var/www/html/chat-staging-dev && sudo mv /tmp/dist /var/www/html/chat-staging-dev'

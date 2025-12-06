@@ -381,6 +381,14 @@ const source: Language = {
       copy: 'Copy',
       continue: 'Continue',
       warning: 'Warning',
+      copy_success: 'Copied',
+      hide: 'Hide',
+      show: 'Show',
+      reset: 'Reset Token',
+      token_org: 'Token Org',
+      reset_token_confirm:
+        'Are you sure you want to change the access token? This will stop all APIs from working.',
+      create_new_token: 'Create new token',
       tiktok: 'Tiktok',
     },
     view: {
@@ -878,6 +886,7 @@ const source: Language = {
             action: {
               open_url: 'Go to link',
               open_facebook: 'Facebook profile',
+              open_tiktok: 'Tiktok profile',
               open_inbox: 'Open Facebook inbox',
               mark_unread: 'Mark message as unread',
               block_user: 'Block user',

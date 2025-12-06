@@ -1,7 +1,7 @@
 <template>
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 68 68"
+    viewBox="4 4 56 56"
     width="16"
     height="16"
     id="tiktok"
