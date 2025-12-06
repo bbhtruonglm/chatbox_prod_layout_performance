@@ -319,7 +319,7 @@ async function readNoti(noti?: NotiInfo, is_close?: boolean) {
       }
   } catch (e) {
   } finally {
-    // tắt loading
+    /** tắt loading */
     commonStore.is_loading_full_screen = false
   }
 }
