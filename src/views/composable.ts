@@ -16,7 +16,7 @@ export function initRequireData() {
   const chatbotUserStore = useChatbotUserStore()
   const orgStore = useOrgStore()
 
-  // init các dữ liệu cần thiết
+  /** init các dữ liệu cần thiết */
   onMounted(() => {
     getMeChatbotUser()
     getAllOrg()
@@ -52,10 +52,10 @@ export function initRequireData() {
   /**lấy danh sách các tổ chức của người dùng này */
   async function getAllOrg() {
     try {
-      // nếu chưa đăng nhập thì thôi
+      /* nếu chưa đăng nhập thì thôi */
       if (!getItem('access_token')) return
 
-      // lấy danh sách các tổ chức
+      /* lấy danh sách các tổ chức */
       orgStore.list_org = await new BillingAppOrganization().readOrg()
 
       console.log(orgStore.list_org, 'lisst org')
@@ -63,7 +63,7 @@ export function initRequireData() {
       // tự động lấy thông tin tổ chức hiện tại
       getCurrentOrgInfo()
     } catch (e) {
-      // hiển thị thông báo lỗi
+      /* hiển thị thông báo lỗi */
       toastError(e)
     }
   }

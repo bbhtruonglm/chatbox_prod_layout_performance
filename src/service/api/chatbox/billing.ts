@@ -10,9 +10,9 @@ import type {
   TransactionInfo,
   WalletInfo,
 } from '@/service/interface/app/billing'
+import { chatboxSync, chatboxSyncNew } from '@/service/api/chatbox/common'
 
 import type { QuotaType } from '@/service/interface/app/ai'
-import { chatboxSync } from '@/service/api/chatbox/common'
 
 /**đọc tổ chức */
 export const read_org = async (org_id?: string): Promise<OrgInfo[]> =>

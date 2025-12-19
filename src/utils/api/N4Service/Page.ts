@@ -118,6 +118,27 @@ export class N4SerivceAppPage extends N4Serivce {
     )
   }
   /**
+   * lấy dữ liệu page, widget, staff, user, ... của các page liên quan cần chat
+   * @param org_id id tổ chức
+   * @param page_ids danh sách id trang
+   * @param is_raw_error trả về dữ liệu lỗi nguyên bản
+   */
+  public async getPageDetails(
+    org_id: string,
+    page_ids: string[],
+    is_raw_error?: boolean
+  ): Promise<PageList> {
+    // gọi api
+    return this.post(
+      'get_pages_details',
+      {
+        org_id,
+        page_ids: page_ids,
+      },
+      is_raw_error
+    )
+  }
+  /**
    * tạo trang website
    * @param body thông tin trang
    */

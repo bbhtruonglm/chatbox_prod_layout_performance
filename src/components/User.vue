@@ -149,10 +149,10 @@ const modal_user_info_ref = ref<InstanceType<typeof UserInfo>>()
 const modal_keyboard_shortcut =
   ref<InstanceType<typeof ModalKeyboardShortcut>>()
 
-// đếm số thông báo khi khởi động
-onMounted(countNoti)
+/** đếm số thông báo khi khởi động / Ẩn vì đang dùng watch để call rồi */
+// onMounted(countNoti)
 
-// khi chọn lại org thì đếm lại số thông báo
+/** khi chọn lại org thì đếm lại số thông báo */
 watch(
   () => [
     orgStore.selected_org_id,
@@ -165,13 +165,15 @@ watch(
 /** đếm số thông báo */
 async function countNoti() {
   // nếu đang là chọn tất cả tổ chức
-  if (orgStore.is_selected_all_org) {
-    orgStore.count_noti = await countNotiAllOrg()
-    return
-  }
+  // if (orgStore.is_selected_all_org) {
+  //   orgStore.count_noti = await countNotiAllOrg()
+  //   return
+  // }
+  /** Luôn call api function count all noti, vì đã dùng list org_id rồi */
+  orgStore.count_noti = await countNotiAllOrg()
 
   // đếm số thông báo cho tổ chức hien tại
-  orgStore.count_noti = await countNotiCurrentOrg()
+  // orgStore.count_noti = await countNotiCurrentOrg()
 }
 
 /** đếm số thông báo cho tất cả tổ chức */
@@ -181,20 +183,22 @@ async function countNotiAllOrg() {
   try {
     /** danh sách các tổ chức */
     const LIST_ORG = orgStore.list_org || []
-    /** Lấy list org id */
-    const ORG_IDS = LIST_ORG.map(item => item.org_id || '')
-    if (isEmpty(ORG_IDS)) return
+    /** Map lấy org_id */
+    const ORG_IDS = LIST_ORG.map(item => item?.org_id || '')
+
     // lặp qua từng tổ chức để đếm số thông báo
     // for (const org of LIST_ORG) {
-
     //   // nếu không có id tổ chức thì thôi qua tổ chức tiếp theo
     //   if (!org.org_id) continue
     //   // cộng số thông báo lấy được vào total_count
-    //   // total_count += await count_noti(org.org_id)
+    //   total_count += await count_noti(org.org_id)
     // }
+    /** Nếu k có org_ids thì return luôn */
+    if (isEmpty(ORG_IDS)) return
+    /** Gán giá trị. = data khi call api */
     total_count += await count_all_noti(ORG_IDS)
   } catch (e) {
-    // tạm thời không xử lý
+    /** tạm thời không xử lý */
   } finally {
     return total_count
   }
@@ -203,13 +207,13 @@ async function countNotiAllOrg() {
 /**đếm số noti của tổ chức đang chọn */
 async function countNotiCurrentOrg() {
   try {
-    // nếu chưa chọn tổ chức thì không làm gì
+    /** nếu chưa chọn tổ chức thì không làm gì */
     if (!orgStore.selected_org_id) return
 
-    // đếm số thông báo
+    /** đếm số thông báo */
     return await count_noti(orgStore.selected_org_id)
   } catch (e) {
-    // tạm thời không xử lý
+    /** tạm thời không xử lý */
   }
 }
 /** Mở menu */
@@ -221,36 +225,36 @@ function openMenu($event: MouseEvent) {
 }
 /**mở menu */
 function redirectMenu(path: string) {
-  // tắt menu dropdown
+  /** tắt menu dropdown */
   user_menu_ref.value?.toggleDropdown()
 
-  // chuyển đến trang
+  /** chuyển đến trang */
   $router.push(`/dashboard/${path}`)
 }
 /**mở modal thông tin người dùng */
 function openUserInfoModal() {
-  // tắt menu dropdown
+  /** tắt menu dropdown */
   user_menu_ref.value?.toggleDropdown()
 
-  // mở modal thông tin người dùng
+  /** mở modal thông tin người dùng */
   modal_user_info_ref.value?.toggleModal()
 }
 
 /** mở modal phím tắt */
 function openKeyboardShortcutModal() {
-  // tắt menu dropdown
+  /** tắt menu dropdown */
   user_menu_ref.value?.toggleDropdown()
 
-  // mở modal phím tắt
+  /** mở modal phím tắt */
   modal_keyboard_shortcut.value?.toggleModal?.()
 }
 
 /**mở modal của noti */
 function openNoti() {
-  // tắt dropdown
+  /** tắt dropdown */
   user_menu_ref.value?.toggleDropdown()
 
-  // mở modal
+  /** mở modal */
   modal_alert_ref.value?.toggleModal()
 }
 </script>

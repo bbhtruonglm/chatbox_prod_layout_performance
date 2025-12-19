@@ -122,6 +122,7 @@ watch(
 onMounted(() => {
   checkOverLimit()
 
+  // $main.getPageInfoToChat()
   $main.getPageInfoToChat()
 
   $main.getPageOfCurrentOrg()
@@ -631,7 +632,12 @@ class Main {
       throw $t('v1.view.main.dashboard.chat.error.get_org_info')
 
     /**dữ liệu các trang đang chọn */
-    const PAGES = await new N4SerivceAppPage().getPageInfoToChat(
+    // const PAGES_OLD = await new N4SerivceAppPage().getPageInfoToChat(
+    //   orgStore.selected_org_id,
+    //   SELECTED_PAGE_IDS,
+    //   true
+    // )
+    const PAGES = await new N4SerivceAppPage().getPageDetails(
       orgStore.selected_org_id,
       SELECTED_PAGE_IDS,
       true,
@@ -662,16 +668,16 @@ class Main {
 
   /** lấy danh sách trang của tổ chức hiện tại */
   async getPageOfCurrentOrg() {
-    // nếu không có id tổ chức thì thôi
+    /** nếu không có id tổ chức thì thôi */
     if (!orgStore.selected_org_id) return
 
     /**lấy danh sách trang của tổ chức hiện tại */
     const OSS = await read_os(orgStore.selected_org_id)
 
-    // lưu danh sách các trang của tổ chức hiện tại vào store
+    /** lưu danh sách các trang của tổ chức hiện tại vào store */
     orgStore.list_os = OSS
 
-    // lọc ra các trang zalo cá nhân
+    /** lọc ra các trang zalo cá nhân */
     this.markOrgHaveZalo(OSS)
   }
 
