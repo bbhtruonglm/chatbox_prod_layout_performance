@@ -13,6 +13,10 @@
     id="chat__message-list"
     class="h-full overflow-hidden rounded-b-xl relative"
   >
+    <!-- <SkeletonMessage
+      v-if="is_loading && !messageStore.list_message?.length"
+      class="absolute inset-0 z-20 bg-[#f4f5fa]"
+    /> -->
     <div
       v-if="isLockPage()"
       class="text-sm text-red-600 text-center"
@@ -27,11 +31,25 @@
       class="pt-14 pb-5 pl-2 pr-5 gap-1 flex flex-col h-full overflow-hidden overflow-y-auto bg-[#0015810f] rounded-b-xl"
     >
       <div
-        v-if="is_loading"
-        class="relative z-10"
+        v-if="is_loading && messageStore.list_message?.length"
+        class="flex flex-col gap-4 pt-4 pb-2 pl-2 pr-5 transition-all"
       >
-        <div class="fixed left-1/2 -translate-x-1/2">
-          <Loading class="mx-auto" />
+        <div class="flex gap-2.5">
+          <div
+            class="w-8 h-8 rounded-full bg-slate-200 flex-shrink-0 animate-pulse"
+          ></div>
+          <div class="flex flex-col gap-1">
+            <div
+              class="w-[200px] h-10 bg-slate-100 rounded-lg animate-pulse"
+            ></div>
+          </div>
+        </div>
+        <div class="flex gap-2.5 flex-row-reverse">
+          <div class="flex flex-col gap-1 items-end">
+            <div
+              class="w-[240px] h-14 bg-blue-50 rounded-lg animate-pulse"
+            ></div>
+          </div>
         </div>
       </div>
       <!-- <HeaderChat /> -->
@@ -197,6 +215,7 @@ import StaffAvatar from '@/components/Avatar/StaffAvatar.vue'
 import MessageItem from '@/views/ChatWarper/Chat/CenterContent/MessageList/MessageItem.vue'
 import UnReadAlert from '@/views/ChatWarper/Chat/CenterContent/MessageList/UnReadAlert.vue'
 
+import SkeletonMessage from '@/views/ChatWarper/Chat/CenterContent/MessageList/SkeletonMessage.vue'
 import DoubleCheckIcon from '@/components/Icons/DoubleCheck.vue'
 import ChatIcon from '@/components/Icons/Chat.vue'
 
@@ -540,24 +559,29 @@ function getListMessage(is_scroll?: boolean) {
       },
     ],
     e => {
-      // tắt loading
-      is_loading.value = false
-
-      // load lần đầu thì tự động cuộn xuống
-      if (is_scroll) {
-        scrollToBottomMessage(messageStore.list_message_id)
-
-        setTimeout(
-          () => scrollToBottomMessage(messageStore.list_message_id),
-          500
-        )
-      }
-
       if (e) {
         // gắn cờ đã load hết dữ liệu
         is_done.value = true
 
+        // tắt loading nếu lỗi
+        is_loading.value = false
+
         return toastError(e)
+      }
+
+      // tắt loading
+      if (!is_scroll) is_loading.value = false
+
+      // load lần đầu thì tự động cuộn xuống
+      if (is_scroll) {
+        // tự động cuộn xuống
+        scrollToBottomMessage(messageStore.list_message_id)
+        // tắt loading sau khi scroll sau 0.3s
+        setTimeout(() => {
+          scrollToBottomMessage(messageStore.list_message_id)
+          // tắt loading sau khi scroll
+          is_loading.value = false
+        }, 300)
       }
     }
   )
