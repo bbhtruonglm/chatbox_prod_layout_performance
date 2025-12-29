@@ -245,10 +245,11 @@ const select_conversation = computed(() => {
 
 /** danh sách tin nhắn */
 const show_list_message = computed(() =>
+  // xử lý logic hiển thị tin nhắn
   messageStore.list_message.filter(message => {
     // 1. Nếu có nội dung text hoặc postback -> hiển thị
     if (message.message_text || message.postback_title) return true
-
+    /**  Khai báo attachments */
     const ATTACHMENTS = message.message_attachments
     // 2. Nếu không có attachments (và không có text) -> ẩn
     if (!ATTACHMENTS?.length) return false
@@ -258,6 +259,7 @@ const show_list_message = computed(() =>
       // Nếu không phải template (ảnh, video...) -> hiển thị
       // Hoặc nếu là template thì phải có payload -> hiển thị
       if (att.type !== 'template' || att.payload) return true
+      // Nếu là template thì phải có payload -> hiển thị
       return false
     })
     // Trả về true nếu có attachment hợp lệ
