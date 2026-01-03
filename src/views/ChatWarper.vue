@@ -18,8 +18,8 @@
       </template>
       <template #right>
         <div class="flex gap-2 h-full">
-          <CenterContent :is_loading="should_show_skeleton" />
-          <RightBar :is_loading="should_show_skeleton" />
+          <!-- <CenterContent :is_loading="should_show_skeleton" /> -->
+          <!-- <RightBar :is_loading="should_show_skeleton" /> -->
         </div>
       </template>
     </Layout>
