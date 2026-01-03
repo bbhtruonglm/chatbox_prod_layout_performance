@@ -107,6 +107,7 @@ const $socket = container.resolve(Socket)
 
 // composable
 initRequireData()
+// drop file
 const { onDropFile } = useDropFile()
 
 /**cờ xác định người dùng có đang focus vào tab chat không */
