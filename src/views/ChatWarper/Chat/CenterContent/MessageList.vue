@@ -30,15 +30,7 @@
       :id="messageStore.list_message_id"
       class="pt-14 pb-5 pl-2 pr-5 gap-1 flex flex-col h-full overflow-hidden overflow-y-auto bg-[#0015810f] rounded-b-xl"
     >
-      <!-- TODO: MessageItem cần optimize riêng - gây giảm 15-20 điểm Lighthouse -->
-      <!-- Tạm thời render text đơn giản -->
-      <div
-        v-for="(message, index) of show_list_message"
-        :key="message._id"
-        class="py-2 text-sm"
-      >
-        {{ message.message_text || 'Message' }}
-      </div>
+      <!-- Test: empty div, no v-for -->
     </div>
     <!-- BELOW IS COMMENTED FOR TESTING
       <div
