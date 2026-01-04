@@ -1,10 +1,6 @@
 <template>
   <div class="flex-shrink-0 px-2 gap-1 flex justify-start items-center">
-    <div
-      v-if="is_loading"
-      class="h-8 w-40 bg-slate-200 rounded animate-pulse"
-    ></div>
-    <div v-else>Test Organization Name</div>
+    <div>Test Organization Name</div>
     <!-- <Badge
       v-if="count_all_unread"
       :value="count_all_unread"
