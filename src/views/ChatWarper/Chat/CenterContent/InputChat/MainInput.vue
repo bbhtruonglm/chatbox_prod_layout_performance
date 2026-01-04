@@ -1,6 +1,7 @@
 <template>
+  <!-- Dùng v-show thay vì v-if để tránh layout shift -->
   <div
-    v-if="!is_disable_input"
+    v-show="!is_disable_input"
     id="main_input_chat"
     :class="{
       'pr-3': isVisibleSendBtn(),
@@ -67,7 +68,7 @@
     </div>
   </div>
   <div
-    v-else
+    v-show="is_disable_input"
     class="flex gap-2 text-sm py-2 px-4 rounded-full bg-slate-50 text-slate-400 items-center cursor-not-allowed"
   >
     <!-- <SparklesIcon class="size-5" /> -->
