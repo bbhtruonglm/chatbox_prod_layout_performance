@@ -3,9 +3,16 @@
   <div
     v-show="!is_disable_input"
     id="main_input_chat"
+    :class="{
+      'pr-3': isVisibleSendBtn(),
+      '!rounded-xl':
+        (is_visible_ai_answer || is_loading_ai_answer) &&
+        !commonStore.is_typing &&
+        conversationStore.getPage()?.quick_reply?.is_complete_sentence,
+      'hover:rounded-xl': is_loading_ai_answer,
+    }"
     class="flex flex-col gap-1 bg-white rounded-3xl group py-2 px-4 transition-all"
   >
-    <!-- Test: enable AiAnswer and QuickAnswer -->
     <AiAnswer v-model:is_loading="is_loading_ai_answer" />
     <div class="flex items-end">
       <div class="flex gap-2 items-end flex-grow min-w-0">
@@ -31,6 +38,9 @@
           ref="input_chat_ref"
           :mention_ref="mention_ref"
           @keyup="onInputKeyup"
+          :class="{
+            'animate-fast-pulse': messageStore.is_input_run_ai,
+          }"
         />
       </div>
       <div
@@ -51,7 +61,7 @@
         />
       </div>
       <QuickAnswer ref="quick_answer_ref" />
-      <!-- <Mention ref="mention_ref" /> -->
+      <Mention ref="mention_ref" />
     </div>
   </div>
   <div
