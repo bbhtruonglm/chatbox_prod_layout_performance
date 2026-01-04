@@ -1,6 +1,7 @@
 <template>
+  <!-- Dùng v-show thay vì v-if để tránh layout shift -->
   <div
-    v-if="!select_conversation"
+    v-show="!select_conversation"
     class="w-full h-full flex justify-center items-center text-slate-500 gap-1"
   >
     <ChatIcon class="w-5" />
@@ -9,7 +10,7 @@
     </div>
   </div>
   <div
-    v-else
+    v-show="select_conversation"
     id="chat__message-list"
     class="h-full overflow-hidden rounded-b-xl relative"
   >
