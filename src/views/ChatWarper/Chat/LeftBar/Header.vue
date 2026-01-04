@@ -1,21 +1,7 @@
 <template>
   <div class="flex-shrink-0 px-2 gap-1 flex justify-start items-center">
-    <!-- Container với position relative để chồng skeleton và content -->
-    <div class="relative h-8">
-      <!-- Skeleton loading - dùng opacity thay vì v-if -->
-      <div
-        class="absolute inset-0 w-40 bg-slate-200 rounded animate-pulse transition-opacity duration-200"
-        :class="is_loading ? 'opacity-100' : 'opacity-0 pointer-events-none'"
-      ></div>
-      <!-- Content - dùng opacity thay vì v-else -->
-      <div
-        v-tooltip.bottom="`v${version}`"
-        class="font-semibold text-2xl truncate transition-opacity duration-200"
-        :class="is_loading ? 'opacity-0' : 'opacity-100'"
-      >
-        {{ display_org_name }}
-      </div>
-    </div>
+    <!-- Test: div với CSS classes, không có binding -->
+    <div class="font-semibold text-2xl truncate">Test Organization Name</div>
     <!-- <Badge
       v-if="count_all_unread"
       :value="count_all_unread"
