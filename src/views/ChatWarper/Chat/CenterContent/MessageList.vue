@@ -306,22 +306,21 @@ onMounted(() => {
   // * reset danh sách tin nhắn lúc mới vào nếu không mở bằng modal
   messageStore.list_message = []
 
-  // TODO: Test performance - comment API call
-  // if (true) {
-  //   // * reset danh sách tin nhắn khi đổi khách hàng
-  //   messageStore.list_message = []
+  if (true) {
+    // * reset danh sách tin nhắn khi đổi khách hàng
+    messageStore.list_message = []
 
-  //   // * reset danh sách tin nhắn chờ
-  //   messageStore.send_message_list = []
+    // * reset danh sách tin nhắn chờ
+    messageStore.send_message_list = []
 
-  //   // reset cờ đã load hết dữ liệu
-  //   is_done.value = false
+    // reset cờ đã load hết dữ liệu
+    is_done.value = false
 
-  //   // reset phân trang
-  //   skip.value = 0
+    // reset phân trang
+    skip.value = 0
 
-  //   getListMessage(true)
-  // }
+    getListMessage(true)
+  }
 
   // tin nhắn mới
   window.addEventListener('chatbox_socket_message', socketNewMessage)
