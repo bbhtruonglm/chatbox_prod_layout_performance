@@ -6,7 +6,7 @@
   >
     <!-- Test từng component -->
     <UserInfo />
-    <MessageList />
+    <!-- <MessageList /> -->
     <InputChat :client_id="$route.query.user_id?.toString()" />
   </div>
   <template>
