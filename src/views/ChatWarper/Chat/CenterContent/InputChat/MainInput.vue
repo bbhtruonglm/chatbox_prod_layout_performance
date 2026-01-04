@@ -5,16 +5,15 @@
     id="main_input_chat"
     class="flex flex-col gap-1 bg-white rounded-3xl group py-2 px-4 transition-all"
   >
-    <AiAnswer v-model:is_loading="is_loading_ai_answer" />
+    <!-- Test: comment all children -->
+    <!-- <AiAnswer v-model:is_loading="is_loading_ai_answer" />
     <div class="flex items-end">
       <div class="flex gap-2 items-end flex-grow min-w-0">
-        <!-- <AiManager /> -->
         <AttachmentMenu />
         <FaceSmileIcon
           @click="emoji_ref?.toggleDropdown"
           class="size-5 cursor-pointer text-slate-400 flex-shrink-0 hover:text-slate-700 my-1.5"
         />
-
         <Dropdown
           ref="emoji_ref"
           position="TOP"
@@ -28,7 +27,6 @@
             class="custom-emoji"
           ></emoji-picker>
         </Dropdown>
-
         <Input
           ref="input_chat_ref"
           :mention_ref="mention_ref"
@@ -57,7 +55,7 @@
       </div>
       <QuickAnswer ref="quick_answer_ref" />
       <Mention ref="mention_ref" />
-    </div>
+    </div> -->
   </div>
   <div
     v-show="is_disable_input"
