@@ -1,7 +1,7 @@
 <template>
   <div class="flex-shrink-0 px-2 gap-1 flex justify-start items-center">
-    <!-- Test: div với CSS classes, không có binding -->
-    <div class="font-semibold text-2xl truncate">Test Organization Name</div>
+    <!-- Test: thêm display_org_name (reactive) -->
+    <div class="font-semibold text-2xl truncate">{{ display_org_name }}</div>
     <!-- <Badge
       v-if="count_all_unread"
       :value="count_all_unread"
