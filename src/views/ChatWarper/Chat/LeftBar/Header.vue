@@ -196,16 +196,41 @@ const version = npm_package_version
  * Tên tổ chức để hiển thị
  * - Dùng computed để chỉ track đúng giá trị cần thiết
  * - Tránh deep reactivity tracking trong template
+ * - Cache vào localStorage để render ngay lập tức
  */
 const display_org_name = computed<string>(() => {
+  /** Key lưu cache trong localStorage */
+  const CACHE_KEY = 'cached_org_name'
+
   /** Ưu tiên lấy tên org từ orgStore */
   const ORG_NAME = orgStore.selected_org_info?.org_info?.org_name
-  // nếu có org_name thì trả về
-  if (ORG_NAME) return ORG_NAME
+
+  // nếu có org_name từ API thì lưu cache và trả về
+  if (ORG_NAME) {
+    // lưu cache để lần sau render ngay
+    try {
+      localStorage.setItem(CACHE_KEY, ORG_NAME)
+    } catch {
+      // bỏ qua lỗi localStorage
+    }
+    return ORG_NAME
+  }
+
   /** Fallback lấy tên partner */
   const PARTNER_NAME = commonStore.partner?.name
-  // trả về partner name hoặc chuỗi rỗng
-  return PARTNER_NAME || ''
+  // nếu có partner name thì trả về
+  if (PARTNER_NAME) return PARTNER_NAME
+
+  /** Fallback đọc từ cache localStorage */
+  try {
+    const CACHED_NAME = localStorage.getItem(CACHE_KEY)
+    if (CACHED_NAME) return CACHED_NAME
+  } catch {
+    // bỏ qua lỗi localStorage
+  }
+
+  // trả về chuỗi rỗng nếu không có gì
+  return ''
 })
 /**giá trị của ô tìm kiếm hội thoại */
 const search_conversation = ref<string>()
