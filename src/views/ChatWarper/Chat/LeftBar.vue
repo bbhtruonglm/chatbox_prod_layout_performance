@@ -3,8 +3,8 @@
     id="chat__left-bar"
     class="bg-white w-full h-full rounded-xl flex flex-col overflow-hidden flex-shrink-0 p-2 gap-2"
   >
-    <Header :is_loading="is_loading" />
-    <!-- <Conversation /> -->
+    <!-- <Header :is_loading="is_loading" /> -->
+    <Conversation />
   </div>
 </template>
 
