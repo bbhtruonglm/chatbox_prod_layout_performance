@@ -1,6 +1,6 @@
 <template>
   <div class="flex-shrink-0 px-2 gap-1 flex justify-start items-center">
-    <!-- <div
+    <div
       v-if="is_loading"
       class="h-8 w-40 bg-slate-200 rounded animate-pulse"
     ></div>
@@ -9,13 +9,8 @@
       v-tooltip.bottom="`v${version}`"
       class="font-semibold text-2xl truncate"
     >
-      <template v-if="orgStore.selected_org_info?.org_info?.org_name">
-        {{ orgStore.selected_org_info?.org_info?.org_name }}
-      </template>
-      <template v-else>
-        {{ commonStore.partner?.name }}
-      </template>
-    </div> -->
+      {{ display_org_name }}
+    </div>
     <!-- <Badge
       v-if="count_all_unread"
       :value="count_all_unread"
@@ -196,6 +191,22 @@ const $filter_service = container.resolve(FilterService)
 
 /**phiên bản trong package.json */
 const version = npm_package_version
+
+/**
+ * Tên tổ chức để hiển thị
+ * - Dùng computed để chỉ track đúng giá trị cần thiết
+ * - Tránh deep reactivity tracking trong template
+ */
+const display_org_name = computed<string>(() => {
+  /** Ưu tiên lấy tên org từ orgStore */
+  const ORG_NAME = orgStore.selected_org_info?.org_info?.org_name
+  // nếu có org_name thì trả về
+  if (ORG_NAME) return ORG_NAME
+  /** Fallback lấy tên partner */
+  const PARTNER_NAME = commonStore.partner?.name
+  // trả về partner name hoặc chuỗi rỗng
+  return PARTNER_NAME || ''
+})
 /**giá trị của ô tìm kiếm hội thoại */
 const search_conversation = ref<string>()
 /**trạng thái tìm kiếm */
