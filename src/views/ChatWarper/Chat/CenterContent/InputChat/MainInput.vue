@@ -5,8 +5,8 @@
     id="main_input_chat"
     class="flex flex-col gap-1 bg-white rounded-3xl group py-2 px-4 transition-all"
   >
-    <!-- Test: enable only Input -->
-    <!-- <AiAnswer v-model:is_loading="is_loading_ai_answer" /> -->
+    <!-- Test: enable AiAnswer and QuickAnswer -->
+    <AiAnswer v-model:is_loading="is_loading_ai_answer" />
     <div class="flex items-end">
       <div class="flex gap-2 items-end flex-grow min-w-0">
         <AttachmentMenu />
@@ -50,7 +50,7 @@
           class="w-full h-full"
         />
       </div>
-      <!-- <QuickAnswer ref="quick_answer_ref" /> -->
+      <QuickAnswer ref="quick_answer_ref" />
       <!-- <Mention ref="mention_ref" /> -->
     </div>
   </div>
