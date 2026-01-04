@@ -1,17 +1,15 @@
 <template>
   <div class="flex-shrink-0 px-2 gap-1 flex justify-start items-center">
-    <!-- <div
+    <div
       v-if="is_loading"
       class="h-8 w-40 bg-slate-200 rounded animate-pulse"
-    ></div> -->
-    v-else
+    ></div>
     <div
+      v-else
       v-tooltip.bottom="`v${version}`"
       class="font-semibold text-2xl truncate"
     >
-      <!-- {{ display_org_name }} -->
-
-      12313
+      {{ display_org_name }}
     </div>
     <!-- <Badge
       v-if="count_all_unread"
