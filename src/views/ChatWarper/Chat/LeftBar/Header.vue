@@ -1,11 +1,11 @@
 <template>
   <div class="flex-shrink-0 px-2 gap-1 flex justify-start items-center">
-    <div
+    <!-- <div
       v-if="is_loading"
       class="h-8 w-40 bg-slate-200 rounded animate-pulse"
-    ></div>
+    ></div> -->
+    v-else
     <div
-      v-else
       v-tooltip.bottom="`v${version}`"
       class="font-semibold text-2xl truncate"
     >
