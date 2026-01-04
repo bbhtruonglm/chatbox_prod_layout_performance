@@ -4,12 +4,7 @@
       v-if="is_loading"
       class="h-8 w-40 bg-slate-200 rounded animate-pulse"
     ></div>
-    <div
-      v-else
-      class="font-semibold text-2xl truncate"
-    >
-      Test Organization Name
-    </div>
+    <div v-else>Test Organization Name</div>
     <!-- <Badge
       v-if="count_all_unread"
       :value="count_all_unread"
