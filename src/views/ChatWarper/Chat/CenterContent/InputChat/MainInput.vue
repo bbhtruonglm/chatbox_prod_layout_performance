@@ -5,16 +5,16 @@
     id="main_input_chat"
     class="flex flex-col gap-1 bg-white rounded-3xl group py-2 px-4 transition-all"
   >
-    <!-- Test: comment all children -->
-    <!-- <AiAnswer v-model:is_loading="is_loading_ai_answer" />
+    <!-- Test: enable only Input -->
+    <!-- <AiAnswer v-model:is_loading="is_loading_ai_answer" /> -->
     <div class="flex items-end">
       <div class="flex gap-2 items-end flex-grow min-w-0">
-        <AttachmentMenu />
-        <FaceSmileIcon
+        <!-- <AttachmentMenu /> -->
+        <!-- <FaceSmileIcon
           @click="emoji_ref?.toggleDropdown"
           class="size-5 cursor-pointer text-slate-400 flex-shrink-0 hover:text-slate-700 my-1.5"
-        />
-        <Dropdown
+        /> -->
+        <!-- <Dropdown
           ref="emoji_ref"
           position="TOP"
           width="auto"
@@ -26,17 +26,14 @@
             @emoji-click="onEmojiClick"
             class="custom-emoji"
           ></emoji-picker>
-        </Dropdown>
+        </Dropdown> -->
         <Input
           ref="input_chat_ref"
           :mention_ref="mention_ref"
           @keyup="onInputKeyup"
-          :class="{
-            'animate-fast-pulse': messageStore.is_input_run_ai,
-          }"
         />
       </div>
-      <div
+      <!-- <div
         v-if="isVisibleSendBtn()"
         class="w-8 h-8 cursor-pointer flex-shrink-0"
       >
@@ -52,10 +49,10 @@
           @click="input_chat_ref?.sendMessage"
           class="w-full h-full"
         />
-      </div>
-      <QuickAnswer ref="quick_answer_ref" />
-      <Mention ref="mention_ref" />
-    </div> -->
+      </div> -->
+      <!-- <QuickAnswer ref="quick_answer_ref" /> -->
+      <!-- <Mention ref="mention_ref" /> -->
+    </div>
   </div>
   <div
     v-show="is_disable_input"
