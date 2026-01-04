@@ -1,7 +1,12 @@
 <template>
   <div class="flex-shrink-0 px-2 gap-1 flex justify-start items-center">
-    <!-- Test: thêm display_org_name (reactive) -->
-    <div class="font-semibold text-2xl truncate">{{ display_org_name }}</div>
+    <!-- Test: thêm :class binding -->
+    <div
+      class="font-semibold text-2xl truncate"
+      :class="is_loading ? 'opacity-0' : 'opacity-100'"
+    >
+      {{ display_org_name }}
+    </div>
     <!-- <Badge
       v-if="count_all_unread"
       :value="count_all_unread"
