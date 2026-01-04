@@ -1,9 +1,9 @@
 <template>
   <div class="flex-shrink-0 px-2 gap-1 flex justify-start items-center">
-    <!-- Test: thêm :class binding -->
+    <!-- Hiển thị org name trực tiếp, không cần skeleton loading -->
     <div
+      v-tooltip.bottom="`v${version}`"
       class="font-semibold text-2xl truncate"
-      :class="is_loading ? 'opacity-0' : 'opacity-100'"
     >
       {{ display_org_name }}
     </div>
