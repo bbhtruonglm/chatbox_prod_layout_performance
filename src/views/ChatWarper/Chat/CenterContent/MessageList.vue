@@ -24,7 +24,7 @@
     >
       {{ $t('v1.view.main.dashboard.org.lock_free_page_over_quota') }}
     </div>
-    <FullPost v-else-if="select_conversation.conversation_type === 'POST'" />
+    <FullPost v-else-if="select_conversation?.conversation_type === 'POST'" />
     <div
       v-else
       @scroll="onScrollMessage"
