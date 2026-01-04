@@ -12,7 +12,7 @@
       :value="count_all_unread"
     /> -->
   </div>
-  <!-- <div class="flex-shrink-0 flex items-center justify-between">
+  <div class="flex-shrink-0 flex items-center justify-between">
     <template v-if="!is_search">
       <div class="text-sm gap-3 flex items-center h-8">
         <button
@@ -126,8 +126,8 @@
     <button @click="$filter_service.clearAllFilter()">
       <XMarkIcon class="w-3.5 h-3.5 flex-shrink-0" />
     </button>
-  </div> -->
-  <!-- <QuickFilter /> -->
+  </div>
+  <QuickFilter />
 </template>
 <script setup lang="ts">
 import { isFilterActive } from '@/service/function'
