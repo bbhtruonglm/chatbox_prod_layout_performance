@@ -1,8 +1,6 @@
 import { useChatbotUserStore, useMessageStore, useOrgStore } from '@/stores'
 
 import { BillingAppOrganization } from '@/utils/api/Billing'
-import type { CbError } from '@/service/interface/function'
-import { flow } from '@/service/helper/async'
 import { getCurrentOrgInfo } from '@/service/function'
 import { getItem } from '@/service/helper/localStorage'
 import { handleFileLocal } from '@/service/helper/file'
@@ -16,39 +14,30 @@ export function initRequireData() {
   const chatbotUserStore = useChatbotUserStore()
   const orgStore = useOrgStore()
 
-  /** init các dữ liệu cần thiết */
+  /** init các dữ liệu cần thiết - chạy song song để tối ưu thời gian */
   onMounted(() => {
-    getMeChatbotUser()
-    getAllOrg()
+    // chạy song song 2 API không phụ thuộc nhau
+    Promise.all([getMeChatbotUser(), getAllOrg()]).catch(console.error)
   })
 
   /**đọc các thông tin của user hiện tại đang đăng nhập */
-  function getMeChatbotUser() {
+  async function getMeChatbotUser() {
     // nếu chưa đăng nhập thì thôi
     if (!getItem('access_token')) return
 
-    flow(
-      [
-        // * call api
-        (cb: CbError) =>
-          read_me_chatbot_user((e, r) => {
-            // * call api
-            if (e) {
-              console.log(e)
-              // nếu call api thất bại thì redirect qua login
-              // signout()
-
-              return cb(e)
-            }
-
-            // lưu vào store
-            chatbotUserStore.chatbot_user = r
-            cb()
-          }),
-      ],
-      undefined
-    )
+    return new Promise<void>((resolve, reject) => {
+      read_me_chatbot_user((e, r) => {
+        if (e) {
+          console.log(e)
+          return reject(e)
+        }
+        // lưu vào store
+        chatbotUserStore.chatbot_user = r
+        resolve()
+      })
+    })
   }
+
   /**lấy danh sách các tổ chức của người dùng này */
   async function getAllOrg() {
     try {

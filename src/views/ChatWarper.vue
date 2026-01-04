@@ -625,7 +625,6 @@ class CustomToast extends Toast implements IAlert {
 
 class Main {
   /**đọc dữ liệu của các page được chọn lưu lại */
-  /**đọc dữ liệu của các page được chọn lưu lại */
   // nếu lỗi thì chuyển về trang chọn page
   @error(new CustomToast())
   async getPageInfoToChat() {
@@ -646,17 +645,21 @@ class Main {
       throw $t('v1.view.main.dashboard.chat.error.get_org_info')
 
     try {
-      /**dữ liệu các trang đang chọn */
-      // const PAGES_OLD = await new N4SerivceAppPage().getPageInfoToChat(
-      //   orgStore.selected_org_id,
-      //   SELECTED_PAGE_IDS,
-      //   true
-      // )
-      const PAGES = await new N4SerivceAppPage().getPageDetails(
-        orgStore.selected_org_id,
-        SELECTED_PAGE_IDS,
-        true
-      )
+      /**
+       * Chạy song song 2 API để tối ưu thời gian tải
+       * - getPageDetails: lấy thông tin trang
+       * - readMarket: lấy widget trên chợ (không critical)
+       */
+      const [PAGES, MARKET_WIDGETS] = await Promise.all([
+        // API lấy thông tin trang - critical
+        new N4SerivceAppPage().getPageDetails(
+          orgStore.selected_org_id,
+          SELECTED_PAGE_IDS,
+          true
+        ),
+        // API lấy widget - không critical, catch lỗi để không block
+        new N5AppV1AppApp().readMarket().catch(() => undefined),
+      ])
 
       // nếu không có dữ liệu trang nào thì thôi
       if (!PAGES) throw $t('v1.view.main.dashboard.chat.error.get_page_info')
@@ -668,9 +671,7 @@ class Main {
       pageStore.selected_pages_staffs = User.getUsersInfo(PAGES)
 
       // lưu lại các widget trên chợ, để map cta
-      pageStore.market_widgets = await new N5AppV1AppApp()
-        .readMarket()
-        .catch(() => undefined)
+      pageStore.market_widgets = MARKET_WIDGETS
 
       // khởi tạo kết nối socket lên server
       $socket.connect(
