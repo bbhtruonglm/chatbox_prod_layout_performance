@@ -8,7 +8,7 @@
       v-else
       class="font-semibold text-2xl truncate"
     >
-      {{ display_org_name }}
+      Test Organization Name
     </div>
     <!-- <Badge
       v-if="count_all_unread"
