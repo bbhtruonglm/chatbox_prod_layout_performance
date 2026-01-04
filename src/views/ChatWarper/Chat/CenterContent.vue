@@ -4,9 +4,10 @@
     id="chat__center-content"
     class="h-full flex flex-col flex-grow min-w-0"
   >
-    <UserInfo />
-    <MessageList />
-    <InputChat :client_id="$route.query.user_id?.toString()" />
+    <!-- Test từng component -->
+    <!-- <UserInfo /> -->
+    <!-- <MessageList /> -->
+    <!-- <InputChat :client_id="$route.query.user_id?.toString()" /> -->
   </div>
   <template>
     <!-- <AttachmentViewModal /> -->
