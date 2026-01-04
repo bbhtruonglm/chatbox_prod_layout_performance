@@ -9,7 +9,9 @@
       v-tooltip.bottom="`v${version}`"
       class="font-semibold text-2xl truncate"
     >
-      {{ display_org_name }}
+      <!-- {{ display_org_name }} -->
+
+      12313
     </div>
     <!-- <Badge
       v-if="count_all_unread"
