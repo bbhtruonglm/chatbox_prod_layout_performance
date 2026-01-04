@@ -5,18 +5,15 @@
     id="chat__input-chat"
     class="w-full relative flex-shrink-0 flex flex-col"
   >
-    <!-- Test: comment all children
-    <ScrollToBottomBtn />
-    <ReplyComment v-if="messageStore.reply_comment?.root_comment_id" />
-    <ReplyMessage v-if="messageStore.reply_message?.root_message_id" />
-    <ListLabel
-      v-if="conversationStore.select_conversation?.conversation_type !== 'POST'"
-    />
-    <PreviewAttachment />
+    <!-- Test: comment all children except MainInput -->
+    <!-- <ScrollToBottomBtn /> -->
+    <!-- <ReplyComment v-if="messageStore.reply_comment?.root_comment_id" /> -->
+    <!-- <ReplyMessage v-if="messageStore.reply_message?.root_message_id" /> -->
+    <!-- <ListLabel v-if="conversationStore.select_conversation?.conversation_type !== 'POST'" /> -->
+    <!-- <PreviewAttachment /> -->
     <MainInput
       v-if="conversationStore.select_conversation?.conversation_type !== 'POST'"
     />
-    -->
   </div>
 </template>
 <script setup lang="ts">
