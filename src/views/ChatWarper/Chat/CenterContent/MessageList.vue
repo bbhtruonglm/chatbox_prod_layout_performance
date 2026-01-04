@@ -31,6 +31,9 @@
       :id="messageStore.list_message_id"
       class="pt-14 pb-5 pl-2 pr-5 gap-1 flex flex-col h-full overflow-hidden overflow-y-auto bg-[#0015810f] rounded-b-xl"
     >
+      <!-- Test baseline: empty div -->
+    </div>
+    <!-- BELOW IS COMMENTED FOR TESTING
       <div
         v-if="is_loading && messageStore.list_message?.length"
         class="flex flex-col gap-4 pt-4 pb-2 pl-2 pr-5 transition-all"
@@ -54,132 +57,131 @@
         </div>
       </div>
       <!-- <HeaderChat /> -->
+    <div
+      v-for="(message, index) of show_list_message"
+      :key="message._id"
+      class="relative"
+    >
+      <div class="flex flex-col gap-2">
+        <UnReadAlert :index />
+        <TimeSplit
+          :before_message="show_list_message?.[index - 1]"
+          :now_message="message"
+        />
+      </div>
       <div
-        v-for="(message, index) of show_list_message"
-        :key="message._id"
-        class="relative"
+        :class="{
+          'py-2': ['client', 'page', 'note', 'group'].includes(
+            message.message_type
+          ),
+        }"
+        class="flex gap-1 relative"
       >
-        <div class="flex flex-col gap-2">
-          <UnReadAlert :index />
-          <TimeSplit
-            :before_message="show_list_message?.[index - 1]"
-            :now_message="message"
+        <div
+          v-if="
+            (message.message_type === 'client' && !message.ad_id) ||
+            message.message_type === 'group' ||
+            message.fb_post_id
+          "
+          class="flex-shrink-0"
+        >
+          <ClientAvatar
+            :conversation="select_conversation"
+            :avatar="message?.group_client_avatar"
+            class="w-8 h-8"
           />
         </div>
         <div
           :class="{
-            'py-2': ['client', 'page', 'note', 'group'].includes(
-              message.message_type
-            ),
+            'items-end':
+              ['page', 'note'].includes(message.message_type) || message.ad_id,
           }"
-          class="flex gap-1 relative"
+          class="relative flex flex-col flex-grow min-w-0"
         >
-          <div
+          <MessageItem
             v-if="
-              (message.message_type === 'client' && !message.ad_id) ||
-              message.message_type === 'group' ||
-              message.fb_post_id
+              ['client', 'activity', 'page', 'note', 'group'].includes(
+                message.message_type
+              ) && !message.ad_id
             "
-            class="flex-shrink-0"
-          >
-            <ClientAvatar
-              :conversation="select_conversation"
-              :avatar="message?.group_client_avatar"
-              class="w-8 h-8"
-            />
-          </div>
+            :message="message"
+            :message_index="index"
+          />
           <div
-            :class="{
-              'items-end':
-                ['page', 'note'].includes(message.message_type) ||
-                message.ad_id,
-            }"
-            class="relative flex flex-col flex-grow min-w-0"
+            v-else-if="message.message_type === 'system'"
+            class="text-center px-20"
           >
-            <MessageItem
-              v-if="
-                ['client', 'activity', 'page', 'note', 'group'].includes(
-                  message.message_type
-                ) && !message.ad_id
-              "
-              :message="message"
-              :message_index="index"
+            <SystemMessage
+              v-if="message.message_text"
+              :text="message.message_text"
             />
-            <div
-              v-else-if="message.message_type === 'system'"
-              class="text-center px-20"
-            >
-              <SystemMessage
-                v-if="message.message_text"
-                :text="message.message_text"
-              />
-              <!-- <UnsupportMessage v-else /> -->
-            </div>
-            <template
-              v-else-if="message.message_type === 'client' && message.ad_id"
-            >
-              <PostTemplate
-                :message
-                :message_index="index"
-              />
-            </template>
-
+            <!-- <UnsupportMessage v-else /> -->
+          </div>
+          <template
+            v-else-if="message.message_type === 'client' && message.ad_id"
+          >
             <PostTemplate
-              v-else-if="
-                message.platform_type === 'FB_POST' && message.fb_post_id
-              "
               :message
               :message_index="index"
             />
-            <!-- <UnsupportMessage
+          </template>
+
+          <PostTemplate
+            v-else-if="
+              message.platform_type === 'FB_POST' && message.fb_post_id
+            "
+            :message
+            :message_index="index"
+          />
+          <!-- <UnsupportMessage
               v-else-if="
                 message.message_mid && message.message_mid !== 'undefined'
               "
             /> -->
-            <DoubleCheckIcon
-              v-if="isLastPageMessage(message, index)"
-              class="w-3 h-3 text-green-500 absolute -bottom-1.5 -right-11"
-            />
-          </div>
-          <PageStaffAvatar
-            :message
-            v-if="
-              ['page', 'note'].includes(message.message_type) || message.ad_id
-            "
-          />
-          <ClientRead
-            @change_last_read_message="visibleFirstClientReadAvatar"
-            :time="message.time"
+          <DoubleCheckIcon
+            v-if="isLastPageMessage(message, index)"
+            class="w-3 h-3 text-green-500 absolute -bottom-1.5 -right-11"
           />
         </div>
-        <StaffRead
-          @change_last_read_message="visibleLastStaffReadAvatar"
+        <PageStaffAvatar
+          :message
+          v-if="
+            ['page', 'note'].includes(message.message_type) || message.ad_id
+          "
+        />
+        <ClientRead
+          @change_last_read_message="visibleFirstClientReadAvatar"
           :time="message.time"
         />
       </div>
-      <div
-        v-for="message of messageStore.send_message_list"
-        :key="message.temp_id"
-        class="relative group flex flex-col gap-1 items-end py-2"
-      >
-        <div class="message-size group relative flex gap-1 items-end">
-          <PageTempTextMessage
-            :text="message.text"
-            :mentions="message.mentions"
-            :snap_replay_message="message.snap_replay_message"
-            :is_error="message.error"
-          />
-          <!-- :class="{
+      <StaffRead
+        @change_last_read_message="visibleLastStaffReadAvatar"
+        :time="message.time"
+      />
+    </div>
+    <div
+      v-for="message of messageStore.send_message_list"
+      :key="message.temp_id"
+      class="relative group flex flex-col gap-1 items-end py-2"
+    >
+      <div class="message-size group relative flex gap-1 items-end">
+        <PageTempTextMessage
+          :text="message.text"
+          :mentions="message.mentions"
+          :snap_replay_message="message.snap_replay_message"
+          :is_error="message.error"
+        />
+        <!-- :class="{
             'border border-red-500 rounded-lg': message.error,
           }" -->
-          <StaffAvatar
-            :id="chatbotUserStore.chatbot_user?.user_id"
-            class="w-6 h-6 rounded-oval flex-shrink-0"
-          />
-        </div>
-        <SendStatus :is_error="message.error" />
+        <StaffAvatar
+          :id="chatbotUserStore.chatbot_user?.user_id"
+          class="w-6 h-6 rounded-oval flex-shrink-0"
+        />
       </div>
+      <SendStatus :is_error="message.error" />
     </div>
+    END COMMENTED CONTENT -->
   </div>
 </template>
 <script setup lang="ts">
