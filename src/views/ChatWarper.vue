@@ -14,7 +14,7 @@
     <Menu />
     <Layout>
       <template #left>
-        <LeftBar :is_loading="is_init_loading" />
+        <!-- <LeftBar :is_loading="is_init_loading" /> -->
       </template>
       <template #right>
         <div class="flex gap-2 h-full">
