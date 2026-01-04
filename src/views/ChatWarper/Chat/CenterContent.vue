@@ -1,7 +1,6 @@
 <template>
-  <SkeletonLoading v-if="is_loading" />
+  <!-- Hiển thị content trực tiếp, không dùng v-if/v-else để tránh layout shift -->
   <div
-    v-else
     id="chat__center-content"
     class="h-full flex flex-col flex-grow min-w-0"
   >
