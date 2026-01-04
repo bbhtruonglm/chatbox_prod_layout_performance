@@ -7,7 +7,7 @@
     <!-- Test từng component -->
     <UserInfo />
     <!-- <MessageList /> -->
-    <InputChat :client_id="$route.query.user_id?.toString()" />
+    <!-- <InputChat :client_id="$route.query.user_id?.toString()" /> -->
   </div>
   <!-- Modals commented for testing -->
   <!-- <template>
