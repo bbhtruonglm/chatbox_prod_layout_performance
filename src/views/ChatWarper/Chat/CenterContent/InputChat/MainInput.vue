@@ -14,7 +14,7 @@
           @click="emoji_ref?.toggleDropdown"
           class="size-5 cursor-pointer text-slate-400 flex-shrink-0 hover:text-slate-700 my-1.5"
         />
-        <!-- <Dropdown
+        <Dropdown
           ref="emoji_ref"
           position="TOP"
           width="auto"
@@ -26,7 +26,7 @@
             @emoji-click="onEmojiClick"
             class="custom-emoji"
           ></emoji-picker>
-        </Dropdown> -->
+        </Dropdown>
         <Input
           ref="input_chat_ref"
           :mention_ref="mention_ref"
