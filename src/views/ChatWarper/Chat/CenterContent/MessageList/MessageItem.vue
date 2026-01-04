@@ -9,7 +9,7 @@
       :position="message_type === 'client' ? 'RIGHT' : 'LEFT'"
       :message_type="message?.message_type"
     /> -->
-    <!-- Test: comment all children to checking MessageItem impact -->
+    <!-- Test: uncomment Emotion and MessageDate -->
     <!-- <div class="grid">
       <div
         v-if="message.is_undo"
@@ -54,7 +54,7 @@
           />
         </SliderWarper>
       </div>
-    </div>
+    </div> -->
     <Emotion
       :position="
         message_type === 'page' || message.sender_id === message.fb_page_id
@@ -63,7 +63,7 @@
       "
       :message
     />
-    <SlowReply
+    <!-- <SlowReply
       v-if="
         CHECK_SLOW_REPLY.isSlowReply() || CHECK_SLOW_REPLY.isSystemSlowReply()
       "
@@ -79,9 +79,8 @@
             : ''
         }
       `"
-    />
+    /> -->
     <MessageDate
-      v-else
       :class="{
         'right-0': message_type !== 'client',
       }"
@@ -101,7 +100,7 @@
       :sender_id="message.sender_id"
       :message_type="message.message_type"
     />
-    <MessageReaction
+    <!-- <MessageReaction
       v-if="
         (message_type === 'client' ||
           message_type === 'page' ||
