@@ -3,14 +3,6 @@
   <div
     v-show="!is_disable_input"
     id="main_input_chat"
-    :class="{
-      'pr-3': isVisibleSendBtn(),
-      '!rounded-xl':
-        (is_visible_ai_answer || is_loading_ai_answer) &&
-        !commonStore.is_typing &&
-        conversationStore.getPage()?.quick_reply?.is_complete_sentence,
-      'hover:rounded-xl': is_loading_ai_answer,
-    }"
     class="flex flex-col gap-1 bg-white rounded-3xl group py-2 px-4 transition-all"
   >
     <AiAnswer v-model:is_loading="is_loading_ai_answer" />
