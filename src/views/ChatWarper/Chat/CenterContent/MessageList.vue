@@ -30,7 +30,21 @@
       :id="messageStore.list_message_id"
       class="pt-14 pb-5 pl-2 pr-5 gap-1 flex flex-col h-full overflow-hidden overflow-y-auto bg-[#0015810f] rounded-b-xl"
     >
-      <!-- Test: empty div, no v-for -->
+      <div
+        v-for="(message, index) of show_list_message"
+        :key="message._id"
+        class="py-2"
+      >
+        <MessageItem
+          v-if="
+            ['client', 'activity', 'page', 'note', 'group'].includes(
+              message.message_type
+            ) && !message.ad_id
+          "
+          :message="message"
+          :message_index="index"
+        />
+      </div>
     </div>
     <!-- BELOW IS COMMENTED FOR TESTING
       <div
