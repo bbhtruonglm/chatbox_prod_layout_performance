@@ -1,6 +1,7 @@
 <template>
+  <!-- Dùng v-show thay vì v-if để tránh layout shift -->
   <div
-    v-if="client_id"
+    v-show="client_id"
     id="chat__input-chat"
     class="w-full relative flex-shrink-0 flex flex-col"
   >
