@@ -9,11 +9,11 @@
     <!-- <AiAnswer v-model:is_loading="is_loading_ai_answer" /> -->
     <div class="flex items-end">
       <div class="flex gap-2 items-end flex-grow min-w-0">
-        <!-- <AttachmentMenu /> -->
-        <!-- <FaceSmileIcon
+        <AttachmentMenu />
+        <FaceSmileIcon
           @click="emoji_ref?.toggleDropdown"
           class="size-5 cursor-pointer text-slate-400 flex-shrink-0 hover:text-slate-700 my-1.5"
-        /> -->
+        />
         <!-- <Dropdown
           ref="emoji_ref"
           position="TOP"
@@ -33,7 +33,7 @@
           @keyup="onInputKeyup"
         />
       </div>
-      <!-- <div
+      <div
         v-if="isVisibleSendBtn()"
         class="w-8 h-8 cursor-pointer flex-shrink-0"
       >
@@ -49,7 +49,7 @@
           @click="input_chat_ref?.sendMessage"
           class="w-full h-full"
         />
-      </div> -->
+      </div>
       <!-- <QuickAnswer ref="quick_answer_ref" /> -->
       <!-- <Mention ref="mention_ref" /> -->
     </div>
