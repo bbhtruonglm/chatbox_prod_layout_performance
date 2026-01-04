@@ -10,12 +10,12 @@
       :message_type="message?.message_type"
     /> -->
     <!-- Test: uncomment Emotion and MessageDate -->
-    <!-- <div class="grid">
+    <!-- Test: enable div.grid but comment MessageTemplate -->
+    <div class="grid">
       <div
         v-if="message.is_undo"
         class="col-start-1 row-start-1 z-20 pointer-events-none flex items-end justify-end p-1"
-      >
-      </div>
+      ></div>
 
       <div
         class="col-start-1 row-start-1"
@@ -37,7 +37,7 @@
           v-else
           :count_element="message_source?.length"
         >
-          <MessageTemplate
+          <!-- <MessageTemplate
             v-for="data_source of message_source"
             :key="message?._id"
             :class="addOnClassTemplate()"
@@ -47,14 +47,14 @@
             :attachment_size
             :message
             :mentions="message?.raw?.data?.mentions"
-          />
+          /> -->
           <PhoneAction
             :message
             v-if="messageStore.list_message_id === 'list-message'"
           />
         </SliderWarper>
       </div>
-    </div> -->
+    </div>
     <Emotion
       :position="
         message_type === 'page' || message.sender_id === message.fb_page_id
