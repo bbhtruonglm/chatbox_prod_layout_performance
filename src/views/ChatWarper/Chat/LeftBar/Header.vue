@@ -1,6 +1,6 @@
 <template>
   <div class="flex-shrink-0 px-2 gap-1 flex justify-start items-center">
-    <div
+    <!-- <div
       v-if="is_loading"
       class="h-8 w-40 bg-slate-200 rounded animate-pulse"
     ></div>
@@ -15,13 +15,127 @@
       <template v-else>
         {{ commonStore.partner?.name }}
       </template>
-    </div>
+    </div> -->
     <!-- <Badge
       v-if="count_all_unread"
       :value="count_all_unread"
     /> -->
   </div>
-
+  <!-- <div class="flex-shrink-0 flex items-center justify-between">
+    <template v-if="!is_search">
+      <div class="text-sm gap-3 flex items-center h-8">
+        <button
+          @click="$main.activeTab('CHAT')"
+          :class="{
+            'font-semibold border-b-2 border-black':
+              !conversationStore.option_filter_page_data.conversation_type ||
+              conversationStore.option_filter_page_data.conversation_type ===
+                'CHAT',
+          }"
+          class="h-full flex gap-1 items-center"
+        >
+          <p>{{ $t('Chat') }}</p>
+          <p
+            v-if="conversationStore.count_conversation?.chat"
+            class="rounded-full bg-slate-200 text-slate-700 font-medium text-xxs px-1 leading-[14px] max-w-20 truncate"
+          >
+            {{ currency(conversationStore.count_conversation.chat) }}
+          </p>
+        </button>
+        <button
+          @click="$main.activeTab('POST')"
+          :class="{
+            'font-semibold border-b-2 border-black':
+              conversationStore.option_filter_page_data.conversation_type ===
+              'POST',
+          }"
+          class="h-full flex gap-1 items-center"
+        >
+          <p>{{ $t('Bài viết') }}</p>
+          <p
+            v-if="conversationStore.count_conversation?.post"
+            class="rounded-full bg-slate-200 text-slate-700 font-medium text-xxs px-1 leading-[14px] max-w-20 truncate"
+          >
+            {{ currency(conversationStore.count_conversation.post) }}
+          </p>
+        </button>
+      </div>
+      <div class="flex gap-3 text-slate-500">
+        <button
+          v-show="
+            conversationStore.select_conversation?.platform_type?.includes(
+              'ZALO'
+            )
+          "
+          class="p-2 bg-slate-100 rounded-full"
+          @click="
+            () => {
+              modal_zalo_create_group_ref?.toggleModal()
+              message_data = undefined
+            }
+          "
+          v-tooltip="$t('v1.common.create_new_group')"
+        >
+          <UserGroupIcon class="size-4 flex-shrink-0" />
+        </button>
+        <button
+          class="p-2 bg-slate-100 rounded-full"
+          @click="
+            () => {
+              modal_zalo_personal_ref?.toggleModal()
+              message_data = undefined
+            }
+          "
+          v-tooltip="$t('v1.common.add_customer')"
+        >
+          <UserPlusIcon class="size-4 flex-shrink-0" />
+        </button>
+        <button
+          @click="$main.toggleSearch()"
+          class="w-8 h-8 bg-slate-100 rounded-full flex justify-center items-center"
+          v-tooltip="$t('v1.common.search')"
+        >
+          <SearchIcon class="w-4 h-4" />
+        </button>
+      </div>
+    </template>
+    <div
+      v-else
+      class="relative w-full"
+    >
+      <SearchIcon
+        class="absolute top-1/2 left-3 -translate-y-1/2 w-4 h-4 text-slate-500"
+      />
+      <input
+        v-model="search_conversation"
+        @blur="$main.toggleSearch()"
+        ref="ref_search_conversation"
+        class="w-full bg-slate-100 placeholder-slate-500 py-1.5 pl-9 pr-8 text-sm rounded-full"
+        type="text"
+        :placeholder="$t('v1.common.search')"
+      />
+      <XCircleIcon
+        @click="search_conversation = undefined"
+        v-if="search_conversation"
+        class="absolute top-1/2 right-2 -translate-y-1/2 size-5 text-red-500 cursor-pointer"
+      />
+    </div>
+  </div>
+  <div
+    v-if="isFilterActive()"
+    class="bg-slate-100 rounded-lg py-1.5 px-2 text-xs flex gap-2 items-center"
+    :class="{
+      hidden: conversationStore.selected_quick_filter !== 'ALL',
+    }"
+  >
+    <div class="flex gap-2 w-full min-w-0">
+      <FunnelIcon class="w-3.5 h-3.5 flex-shrink-0" />
+      <p class="truncate">{{ filter }}</p>
+    </div>
+    <button @click="$filter_service.clearAllFilter()">
+      <XMarkIcon class="w-3.5 h-3.5 flex-shrink-0" />
+    </button>
+  </div> -->
   <!-- <QuickFilter /> -->
 </template>
 <script setup lang="ts">
