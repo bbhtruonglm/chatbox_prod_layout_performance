@@ -6,7 +6,6 @@
     ></div>
     <div
       v-else
-      v-tooltip.bottom="`v${version}`"
       class="font-semibold text-2xl truncate"
     >
       {{ display_org_name }}
