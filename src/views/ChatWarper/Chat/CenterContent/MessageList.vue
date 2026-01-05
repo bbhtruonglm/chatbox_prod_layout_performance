@@ -33,7 +33,14 @@
       <div
         v-for="(message, index) of show_list_message"
         :key="message._id"
-        class="py-2"
+        class="py-2 flex"
+        :class="{
+          'justify-end':
+            message.message_type === 'page' || message.message_type === 'note',
+          'justify-start':
+            message.message_type === 'client' ||
+            message.message_type === 'group',
+        }"
       >
         <MessageItem
           v-if="
