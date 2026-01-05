@@ -10,7 +10,7 @@
     <InputChat :client_id="$route.query.user_id?.toString()" />
   </div>
   <!-- Modals commented for testing -->
-  <!-- <template>
+  <template>
     <StaffReadModal />
     <ZaloPersonalModal
       :message="message_data"
@@ -24,7 +24,7 @@
       :message="message_data"
       ref="modal_zalo_share_message_ref"
     />
-  </template> -->
+  </template>
 </template>
 <script setup lang="ts">
 import { useMessageStore } from '@/stores'
