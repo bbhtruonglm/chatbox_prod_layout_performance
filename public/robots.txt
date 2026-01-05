@@ -1,0 +1,10 @@
+# robots.txt - Cho phép tất cả bot crawl
+User-agent: *
+Allow: /
+
+# Chặn các trang không cần index
+Disallow: /api/
+Disallow: /assets/
+
+# Sitemap (optional - thêm sau khi có sitemap.xml)
+# Sitemap: https://chatbox-performance-staging.vercel.app/sitemap.xml

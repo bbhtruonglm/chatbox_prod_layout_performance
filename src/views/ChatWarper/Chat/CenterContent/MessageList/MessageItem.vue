@@ -37,7 +37,7 @@
           v-else
           :count_element="message_source?.length"
         >
-          <!-- <MessageTemplate
+          <MessageTemplate
             v-for="data_source of message_source"
             :key="message?._id"
             :class="addOnClassTemplate()"
@@ -47,7 +47,7 @@
             :attachment_size
             :message
             :mentions="message?.raw?.data?.mentions"
-          /> -->
+          />
           <PhoneAction
             :message
             v-if="messageStore.list_message_id === 'list-message'"
