@@ -16,6 +16,7 @@
     <template v-if="!is_search">
       <div class="text-sm gap-3 flex items-center h-8">
         <button
+          :aria-label="$t('Chat')"
           @click="$main.activeTab('CHAT')"
           :class="{
             'font-semibold border-b-2 border-black':
@@ -34,6 +35,7 @@
           </p>
         </button>
         <button
+          :aria-label="$t('Bài viết')"
           @click="$main.activeTab('POST')"
           :class="{
             'font-semibold border-b-2 border-black':
@@ -58,6 +60,7 @@
               'ZALO'
             )
           "
+          :aria-label="$t('v1.common.create_new_group')"
           class="p-2 bg-slate-100 rounded-full"
           @click="
             () => {
@@ -70,6 +73,7 @@
           <UserGroupIcon class="size-4 flex-shrink-0" />
         </button>
         <button
+          :aria-label="$t('v1.common.add_customer')"
           class="p-2 bg-slate-100 rounded-full"
           @click="
             () => {
@@ -82,6 +86,7 @@
           <UserPlusIcon class="size-4 flex-shrink-0" />
         </button>
         <button
+          :aria-label="$t('v1.common.search')"
           @click="$main.toggleSearch()"
           class="w-8 h-8 bg-slate-100 rounded-full flex justify-center items-center"
           v-tooltip="$t('v1.common.search')"
@@ -123,7 +128,10 @@
       <FunnelIcon class="w-3.5 h-3.5 flex-shrink-0" />
       <p class="truncate">{{ filter }}</p>
     </div>
-    <button @click="$filter_service.clearAllFilter()">
+    <button
+      :aria-label="$t('v1.view.main.dashboard.chat.filter.un_filter')"
+      @click="$filter_service.clearAllFilter()"
+    >
       <XMarkIcon class="w-3.5 h-3.5 flex-shrink-0" />
     </button>
   </div>

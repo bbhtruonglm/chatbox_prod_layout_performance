@@ -4,30 +4,35 @@
       v-if="page_info?.type === 'ZALO_PERSONAL'"
       loading="lazy"
       :src="loadImageUrl()"
+      :alt="page_info?.name || 'Page Avatar'"
       class="w-full h-full object-contain"
     />
     <img
       loading="lazy"
       v-else-if="page_info?.type === 'FB_INSTAGRAM'"
       :src="loadImageUrl()"
+      :alt="page_info?.name || 'Page Avatar'"
       class="w-full h-full"
     />
     <img
       loading="lazy"
       v-else-if="page_info?.type === 'TIKTOK'"
       :src="loadImageUrl()"
+      :alt="page_info?.name || 'Page Avatar'"
       class="w-full h-full"
     />
     <img
       v-else-if="page_info?.avatar"
       loading="lazy"
       :src="page_info?.avatar"
+      :alt="page_info?.name || 'Page Avatar'"
       class="w-full h-full object-contain"
     />
     <img
       loading="lazy"
       v-else-if="page_info?.type === 'FB_MESS'"
       :src="loadImageUrl()"
+      :alt="page_info?.name || 'Page Avatar'"
       class="w-full h-full"
     />
 
@@ -36,6 +41,7 @@
         v-if="page_info?.avatar"
         loading="lazy"
         :src="page_info?.avatar"
+        :alt="page_info?.name || 'Page Avatar'"
         class="w-full h-full"
       />
       <WebIcon
@@ -48,6 +54,7 @@
       loading="lazy"
       v-else-if="page_info?.type === 'ZALO_OA'"
       :src="page_info?.avatar || zaloSvg"
+      :alt="page_info?.name || 'Zalo OA'"
       class="w-full h-full"
     />
   </div>

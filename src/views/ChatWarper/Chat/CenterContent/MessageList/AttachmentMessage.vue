@@ -25,6 +25,7 @@
               "
               :class="is_reply ? 'object-cover' : 'object-contain'"
               class="w-full h-full alo"
+              :alt="$t('Attachment')"
             />
           </div>
         </template>

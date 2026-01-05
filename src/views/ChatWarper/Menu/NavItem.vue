@@ -1,5 +1,6 @@
 <template>
   <button
+    :aria-label="title"
     v-tooltip.right="title"
     :tooltip-disabled="is_disable_tooltip"
     :class="{
@@ -32,7 +33,7 @@ withDefaults(
     class_icon?: string
   }>(),
   {
-    class_icon: 'text-slate-900'
+    class_icon: 'text-slate-900',
   }
 )
 </script>

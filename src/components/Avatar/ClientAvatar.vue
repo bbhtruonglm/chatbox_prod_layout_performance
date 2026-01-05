@@ -5,6 +5,7 @@
     loading="lazy"
     v-if="avatar"
     :src="avatar"
+    :alt="conversation?.client_name || 'Avatar'"
     class="overflow-hidden bg-slate-200 rounded-oval"
   />
   <div
@@ -17,6 +18,7 @@
       @load="removeAnimatePulse"
       loading="lazy"
       :src="$main.loadCommentFromAvatar()"
+      :alt="comment?.from?.name || 'Avatar'"
       class="w-full h-full"
     />
   </div>
@@ -44,6 +46,7 @@
       loading="lazy"
       v-if="conversation?.platform_type === 'FB_MESS'"
       :src="loadImageUrl()"
+      :alt="conversation?.client_name || 'Avatar'"
       class="w-full h-full"
     />
     <img
@@ -52,6 +55,7 @@
       loading="lazy"
       v-if="conversation?.platform_type === 'FB_INSTAGRAM'"
       :src="loadImageUrl(conversation?.platform_type)"
+      :alt="conversation?.client_name || 'Avatar'"
       class="w-full h-full"
     />
     <img
@@ -60,6 +64,7 @@
       loading="lazy"
       v-if="conversation?.platform_type === 'TIKTOK'"
       :src="loadImageUrl(conversation?.platform_type)"
+      :alt="conversation?.client_name || 'Avatar'"
       class="w-full h-full"
     />
     <img
@@ -70,6 +75,7 @@
         conversation?.platform_type === 'ZALO_OA' && conversation?.client_avatar
       "
       :src="conversation?.client_avatar"
+      :alt="conversation?.client_name || 'Avatar'"
       class="w-full h-full"
     />
     <img
@@ -81,6 +87,7 @@
         conversation?.client_avatar
       "
       :src="conversation?.client_avatar"
+      :alt="conversation?.client_name || 'Avatar'"
       class="w-full h-full"
     />
     <div

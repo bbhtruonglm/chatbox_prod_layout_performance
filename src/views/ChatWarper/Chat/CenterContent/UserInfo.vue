@@ -88,6 +88,7 @@
       <!--  -->
       <button
         v-if="orgStore.selected_org_info?.org_package?.org_allow_message_action"
+        :aria-label="$t('Gọi điện thoại')"
         @click="toggleListPhone"
         v-tooltip.left="$t('Gọi điện thoại')"
         class="p-1.5 flex justify-center items-center rounded-lg border border-green-600 bg-green-100"
@@ -100,6 +101,7 @@
       <!--  -->
       <button
         v-if="conversationStore.select_conversation?.is_group === true"
+        :aria-label="$t('Thành viên nhóm')"
         @click="member_list_ref?.toggle"
         v-tooltip.left="$t('Thành viên nhóm')"
         class="p-1.5 flex justify-center items-center rounded-lg border border-slate-500 hover:bg-slate-100"
@@ -108,6 +110,7 @@
       </button>
       <!--  -->
       <button
+        :aria-label="$t('v1.view.main.dashboard.chat.action.mark_unread')"
         @click="$main.unreadConversation"
         v-tooltip.left="$t('v1.view.main.dashboard.chat.action.mark_unread')"
         class="text-slate-500 border border-slate-500 p-1.5 rounded-lg hover:bg-slate-100"
@@ -122,6 +125,7 @@
         />
       </button>
       <button
+        :aria-label="$t('v1.common.more')"
         v-tooltip.bottom="$t('v1.common.more')"
         @click="client_menu_ref?.toggle"
         class="text-slate-500 border border-slate-500 p-1.5 rounded-lg hover:bg-slate-100"

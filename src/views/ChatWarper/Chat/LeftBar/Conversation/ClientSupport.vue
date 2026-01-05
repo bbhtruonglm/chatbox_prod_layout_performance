@@ -6,6 +6,7 @@
         v-if="source?.last_message_type === 'page'"
         class="w-3 h-3 flex-shrink-0"
         src="@/assets/icons/reply.svg"
+        :alt="$t('v1.view.main.dashboard.chat.action.has_reply')"
       />
       <div class="flex items-center overflow-x-auto gap-1 w-full">
         <Label
@@ -23,6 +24,7 @@
         v-if="source?.client_phone"
         src="@/assets/icons/phone.svg"
         class="w-3 h-3"
+        :alt="$t('v1.view.main.dashboard.chat.filter.phone.title')"
       />
       <template v-if="isFindUid() || source?.client_bio?.fb_uid">
         <Loading
@@ -37,6 +39,7 @@
           v-tooltip.bottom="`Uid: ${source?.client_bio?.fb_uid}`"
           src="@/assets/icons/id.svg"
           class="w-3 h-3"
+          alt="UID"
         />
       </template>
       <!-- Nếu AI bật và thiết lập AI bật thì mới hiển thị icon -->

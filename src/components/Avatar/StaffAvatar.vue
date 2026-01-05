@@ -10,6 +10,7 @@
       @error="onImageError"
       @load="removeAnimatePulse"
       class="w-full h-full"
+      :alt="$t('Staff Avatar')"
     />
   </div>
 </template>

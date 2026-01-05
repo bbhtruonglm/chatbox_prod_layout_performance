@@ -1,34 +1,113 @@
 <!DOCTYPE html>
 <html
-  lang="en"
+  lang="vi"
   translate="no"
 >
   <head>
     <meta charset="UTF-8" />
-    <!-- <link
-      rel="icon"
-      href="./favicon.ico"
-    /> -->
+
+    <!-- Preconnect để giảm latency cho các API calls -->
+    <link
+      rel="preconnect"
+      href="https://chatbox-billing.botbanhang.vn"
+      crossorigin
+    />
+    <link
+      rel="preconnect"
+      href="https://chatbox-service-v3.botbanhang.vn"
+      crossorigin
+    />
+    <link
+      rel="dns-prefetch"
+      href="https://chatbox-billing.botbanhang.vn"
+    />
+    <link
+      rel="dns-prefetch"
+      href="https://chatbox-service-v3.botbanhang.vn"
+    />
+    <link
+      rel="dns-prefetch"
+      href="https://www.googletagmanager.com"
+    />
+
+    <!-- SEO Meta Tags -->
+    <title>Đăng nhập - Nền tảng quản lý tin nhắn đa kênh</title>
+    <meta
+      name="description"
+      content="Đăng nhập vào nền tảng quản lý tin nhắn, chăm sóc khách hàng đa kênh. Hỗ trợ Facebook, Zalo, và nhiều kênh khác."
+    />
+    <meta
+      name="robots"
+      content="index, follow"
+    />
+    <link
+      rel="canonical"
+      href="https://chatbox-performance-staging.vercel.app/oauth/login"
+    />
+
+    <!-- Open Graph / Facebook -->
+    <meta
+      property="og:type"
+      content="website"
+    />
+    <meta
+      property="og:url"
+      content="https://chatbox-performance-staging.vercel.app/oauth/login"
+    />
+    <meta
+      property="og:title"
+      content="Đăng nhập - Nền tảng quản lý tin nhắn đa kênh"
+    />
+    <meta
+      property="og:description"
+      content="Đăng nhập vào nền tảng quản lý tin nhắn, chăm sóc khách hàng đa kênh. Hỗ trợ Facebook, Zalo, và nhiều kênh khác."
+    />
+
+    <!-- Twitter Card -->
+    <meta
+      name="twitter:card"
+      content="summary"
+    />
+    <meta
+      name="twitter:title"
+      content="Đăng nhập - Nền tảng quản lý tin nhắn đa kênh"
+    />
+    <meta
+      name="twitter:description"
+      content="Đăng nhập vào nền tảng quản lý tin nhắn, chăm sóc khách hàng đa kênh."
+    />
+
+    <!-- Favicon: được set động trong App.vue từ partner info -->
+
+    <!-- Viewport -->
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+      content="width=device-width, initial-scale=1.0"
     />
+
+    <!-- Check Ad Blocker -->
     <script src="/check-ad-blocker.js"></script>
-    <title></title>
 
     <!-- Google tag (gtag.js) -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-PL4M71RS48"
-    ></script>
     <script>
-      window.dataLayer = window.dataLayer || []
-      function gtag() {
-        dataLayer.push(arguments)
-      }
-      gtag('js', new Date())
+      /** Defer load Google Analytics sau khi page load xong */
+      window.addEventListener('load', function () {
+        /** Tạo script tag cho gtag.js */
+        var gtagScript = document.createElement('script')
+        gtagScript.async = true
+        gtagScript.src =
+          'https://www.googletagmanager.com/gtag/js?id=G-PL4M71RS48'
+        document.head.appendChild(gtagScript)
 
-      gtag('config', 'G-PL4M71RS48')
+        /** Khởi tạo dataLayer và gtag function */
+        window.dataLayer = window.dataLayer || []
+        function gtag() {
+          dataLayer.push(arguments)
+        }
+        window.gtag = gtag
+        gtag('js', new Date())
+        gtag('config', 'G-PL4M71RS48')
+      })
     </script>
   </head>
 

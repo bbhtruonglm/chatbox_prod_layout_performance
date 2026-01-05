@@ -7,7 +7,11 @@
     }"
   >
     <div class="flex items-center gap-1">
-      <SparklesIcon class="size-4" />
+      <SparklesIcon
+        class="size-4"
+        :alt="$t('Trợ lý AI')"
+        aria-label="Trợ lý AI"
+      />
       <Toggle
         :modelValue="is_enable"
         @click="$main.toggleClientChatbot()"
@@ -16,6 +20,7 @@
           'cursor-not-allowed'
         }`"
         :disabled="true"
+        :aria-label="$t('Trợ lý AI')"
       />
     </div>
     <p class="text-xxs leading-3">{{ getAiAgentStatus?.() }}</p>
