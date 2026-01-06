@@ -1,5 +1,5 @@
 <template>
-  <SkeletonLoading v-if="is_loading" />
+  <SkeletonLoading v-if="is_loading || is_loading_widget" />
   <div
     v-else
     id="chat__right-bar"
@@ -29,15 +29,16 @@
             {{ widget.snap_app?.name }}
             <div class="flex gap-3">
               <button
+                :aria-label="$t('Thiết lập')"
                 @click.stop="
                   e => {
                     selected_widget_id = widget._id || ''
                     widget_dropdown_ref?.toggleDropdown(e)
                   }
                 "
-                class="hidden group-hover:block"
+                class="hidden group-hover:flex w-8 h-8 items-center justify-center rounded hover:bg-slate-100"
                 :class="{
-                  '!block':
+                  '!flex':
                     widget._id === selected_widget_id &&
                     widget_dropdown_ref?.is_open,
                 }"
@@ -53,7 +54,10 @@
                   v-tooltip.bottom="$t('Thiết lập')"
                 />
               </button>
-              <button class="hover:bg-slate-100 mr-1 h-fit p-0.5 rounded">
+              <button
+                class="hover:bg-slate-100 mr-1 h-8 w-8 flex items-center justify-center rounded"
+                :aria-label="widget.is_show ? $t('Thu gọn') : $t('Mở rộng')"
+              >
                 <ChevronDownIcon
                   :class="{
                     '-rotate-90': !widget.is_show,
@@ -76,6 +80,7 @@
               :id="`widget-${widget._id}`"
               class="w-full h-full"
               :src="widget.url"
+              :title="widget.snap_app?.name || 'Widget'"
               frameborder="0"
               allow="microphone; camera; autoplay; speaker"
             />
@@ -217,7 +222,7 @@ import {
 
 import type { AppInstalledInfo } from '@/service/interface/app/widget'
 // props
-defineProps<{
+const props = defineProps<{
   /** có nên hiển thị skeleton loading ko */
   is_loading?: boolean
 }>()
@@ -260,14 +265,41 @@ const current_visible_widgets = computed(() => {
   return default_visible_widgets.value?.[PAGE_ID || ''] || []
 })
 
-/** trạng thái của tài khoản hiện tại có phải là admin hay ko? */
 const is_admin = computed(() => conversationStore.isCurrentStaffAdmin())
 // composables
 const { toggleWidget } = useWidget()
 
+/** trạng thái loading widget */
+// Mặc định loading để nối tiếp skeleton của App Init
+const is_loading_widget = ref(true)
+
 watch(
-  () => conversationStore.list_widget_token?.data,
-  () => getListWidget()
+  [
+    () => conversationStore.list_widget_token,
+    () => conversationStore.select_conversation?.fb_page_id,
+  ],
+  async ([token, page_id]) => {
+    // Nếu chưa có page ID hoặc chưa có token -> Giữ loading
+    if (!page_id || !token) return
+
+    // Nếu token chưa khớp với page hiện tại -> Giữ loading chờ token mới
+    if (token.new_page_id !== page_id) return
+    // Bật loading widget
+    is_loading_widget.value = true
+    try {
+      // reset lại widget list
+
+      await getListWidget()
+    } catch (e) {
+      console.error(e)
+    } finally {
+      // delay chút để UI render
+      setTimeout(() => {
+        is_loading_widget.value = false
+      }, 300)
+    }
+  },
+  { immediate: true }
 )
 
 /**đọc danh sách các widget của trang này */

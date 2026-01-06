@@ -17,6 +17,7 @@
         ref="iframe_ref"
         class="w-full rounded-xl"
         :src="url_iframe"
+        :title="$t('Hội thoại Zalo cá nhân')"
         frameborder="0"
       ></iframe>
     </template>

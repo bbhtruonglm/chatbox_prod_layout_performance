@@ -264,9 +264,89 @@ class Main {
       ...conversationStore.conversation_list,
       ...CONVERSATIONS,
     }
+  }
 
-    /** tự động chọn khách hàng cho lần đầu tiên */
-    if (is_first_time) $main.selectDefaultConversation(is_pick_first)
+  /** Lấy hội thoại đầu tiên để hiển thị nhanh */
+  async pickFirstConversationImmediately() {
+    // Kiểm tra kết nối internet
+    if (!commonStore.is_connected_internet) return
+    // Kiểm tra đã chọn tổ chức chưa
+    if (!orgStore.selected_org_id) return
+
+    /** Danh sách ID trang đã chọn */
+    const PAGE_IDS = keys(pageStore.selected_page_id_list)
+    /** Cấu hình đặc biệt của trang hiện tại */
+    const SPECIAL_PAGE_CONFIG = this.SERVICE_CALC_SPECIAL_PAGE_CONFIGS.exec()
+
+    /** Cấu hình sắp xếp hội thoại */
+    const SORT =
+      SPECIAL_PAGE_CONFIG?.sort_conversation === 'UNREAD'
+        ? 'unread_message_amount:desc,last_message_time:desc'
+        : undefined
+
+    /** Bộ lọc ghi đè */
+    const OVERWRITE_FILTER: FilterConversation = {}
+
+    // Xử lý logic lọc đặc biệt cho nhân viên
+    if (
+      SPECIAL_PAGE_CONFIG.is_only_visible_client_of_staff &&
+      conversationStore.option_filter_page_data.conversation_type !== 'POST'
+    ) {
+      OVERWRITE_FILTER.staff_id = []
+
+      // Thêm ID nhân viên hiện tại vào bộ lọc
+      if (chatbotUserStore.chatbot_user?.user_id)
+        OVERWRITE_FILTER.staff_id?.push(chatbotUserStore.chatbot_user?.user_id)
+
+      // Thêm Facebook Staff ID nếu có
+      if (chatbotUserStore.chatbot_user?.fb_staff_id)
+        OVERWRITE_FILTER.staff_id?.push(
+          chatbotUserStore.chatbot_user?.fb_staff_id
+        )
+    }
+
+    try {
+      /** Kết quả trả về từ API đọc danh sách hội thoại */
+      const RES = await this.API_CONVERSATION.readConversations(
+        PAGE_IDS,
+        orgStore.selected_org_id,
+        {
+          ...conversationStore.option_filter_page_data,
+          ...OVERWRITE_FILTER,
+        },
+        1,
+        SORT
+      )
+
+      /** Danh sách hội thoại từ response */
+      const CONVERSATIONS = RES.conversation
+
+      // Nếu có danh sách hội thoại
+      if (size(CONVERSATIONS)) {
+        /** Hội thoại đầu tiên trong danh sách */
+        const FIRST_CONV = map(CONVERSATIONS)[0]
+
+        // Bỏ qua record của page chat cho page (chính mình chat với mình)
+        if (FIRST_CONV.fb_page_id === FIRST_CONV.fb_client_id) return
+
+        // Gán key định danh cho hội thoại
+        FIRST_CONV.data_key = `${FIRST_CONV.fb_page_id}_${FIRST_CONV.fb_client_id}`
+
+        // Cập nhật vào store danh sách hội thoại
+        conversationStore.conversation_list = {
+          ...conversationStore.conversation_list,
+          [FIRST_CONV.data_key]: FIRST_CONV,
+        }
+
+        // Chọn hội thoại này
+        selectConversation(FIRST_CONV, false)
+
+        /** Đẩy ID lên URL params để đồng bộ */
+        setParamChat($router, FIRST_CONV.fb_page_id, FIRST_CONV.fb_client_id)
+      }
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   /**
@@ -508,13 +588,31 @@ class Main {
     }
 
     /** reset data */
-    conversationStore.conversation_list = {}
+    // conversationStore.conversation_list = {}
 
     /** reset phân trang */
     after.value = undefined
 
     /** reset trạng thái load */
     is_done.value = false
+
+    // Nếu có params, gọi trước để load luôn, không cần chờ list conversation
+    if (is_first_time && !is_pick_first) {
+      /** id trang trên url */
+      const PAGE_ID = ($route.query?.p || $route.query?.page_id) as string
+      /** id khách hàng trên url */
+      const USER_ID = ($route.query?.u || $route.query?.user_id) as string
+      // nếu có param -> chọn hội thoại
+      if (PAGE_ID && USER_ID) {
+        this.selectDefaultConversation(false)
+      } else {
+        // Nếu không có param -> Lấy thằng đầu tiên luôn
+        this.pickFirstConversationImmediately()
+      }
+    } else if (is_first_time && is_pick_first) {
+      // Trường hợp pick first explicit (ví dụ chuyển tab) -> cũng gọi luôn
+      this.pickFirstConversationImmediately()
+    }
 
     await this.getConversation(is_first_time, is_pick_first)
 
@@ -712,9 +810,31 @@ class Main {
 const $main = new Main()
 
 /** khi component được render */
+/** khi component được render */
 onMounted(() => {
   /** Khi khởi tạo thì set loading = true để tránh bị blink */
   conversationStore.is_loading_list = true
+
+  // Gọi ngay lập tức để lấy hội thoại đầu tiên (hoặc theo param)
+  // Không chờ page info chi tiết
+  // Check params để quyết định gọi hàm nào
+
+  /** id trang trên url */
+  const QUERY_PAGE_ID = ($route.query?.p || $route.query?.page_id) as string
+  /** id khách hàng trên url */
+  const QUERY_USER_ID = ($route.query?.u || $route.query?.user_id) as string
+  // nếu có param -> chọn hội thoại
+  if (QUERY_PAGE_ID && QUERY_USER_ID) {
+    if (!$main.selectDefaultConversation) {
+      // should not happen
+    } else {
+      // không tự động select input chat
+      $main.selectDefaultConversation(false)
+    }
+  } else {
+    // không tự động select input chat
+    $main.pickFirstConversationImmediately()
+  }
 
   /** lắng nghe sự kiện socket */
   window.addEventListener(

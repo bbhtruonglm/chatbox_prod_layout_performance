@@ -19,6 +19,7 @@
           :id="`widget-${selected_widget?._id}`"
           class="w-full h-full"
           :src="genUrl()"
+          :title="selected_widget?.snap_app?.name || 'Widget'"
           frameborder="0"
           allow="microphone; camera; autoplay; speaker"
         />
@@ -91,7 +92,7 @@ function genUrl() {
   //   // tiêm thêm thành phố nếu trong tin nhắn không có
   // if (
   //   // AI không có thành phố
-  //   !$props.ai?.city && 
+  //   !$props.ai?.city &&
   //   // có thành phố trong trang đã tìm được
   //   PAGE_CITY
   // ) {

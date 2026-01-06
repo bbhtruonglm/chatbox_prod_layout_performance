@@ -68,7 +68,7 @@ import { storeToRefs } from 'pinia'
 import { container } from 'tsyringe'
 import { onMounted, onUnmounted, ref, toRef, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 import AlertAccountLimitReached from '@/components/AlertModal/AlertAccountLimitReached.vue'
 import AlertRechQuota from '@/components/AlertModal/AlertRechQuota.vue'
@@ -102,6 +102,7 @@ const { ref_alert_reach_limit } = storeToRefs(commonStore)
 // utils
 const { t: $t } = useI18n()
 const $router = useRouter()
+const $route = useRoute()
 const $delay = container.resolve(Delay)
 const $socket = container.resolve(Socket)
 
@@ -120,17 +121,21 @@ const is_init_loading = ref(true)
 
 /** Có nên hiển thị skeleton loading cho center va right bar ko */
 const should_show_skeleton = computed(() => {
-  return (
-    is_init_loading.value ||
-    conversationStore.is_loading_list ||
-    (size(conversationStore.conversation_list) > 0 &&
-      !conversationStore.select_conversation)
-  )
+  return is_init_loading.value
 })
 
 watch(
   () => conversationStore.select_conversation,
-  (new_val, old_val) => getTokenOfWidget(new_val, old_val)
+  (new_val, old_val) => {
+    // Chỉ load widget khi đã có thông tin page (widget list)
+    if (
+      new_val?.fb_page_id &&
+      !pageStore.selected_page_list_info?.[new_val.fb_page_id]
+    )
+      return
+    // nếu có thay đổi widget thì reset lại conversation
+    getTokenOfWidget(new_val, old_val)
+  }
 )
 
 onMounted(() => {
@@ -311,14 +316,18 @@ function getTokenOfWidget(
       page_id: PAGE_ID,
       list_app_installed_id,
       payload: {
-        fb_client_id: conversationStore.select_conversation?.fb_client_id,
+        fb_client_id:
+          new_val?.fb_client_id ||
+          conversationStore.select_conversation?.fb_client_id,
         page_name: getPageInfo(
           conversationStore.select_conversation?.fb_page_id
         )?.name,
         label_data: map(
           pageStore.selected_page_list_info?.[PAGE_ID]?.label_list
         )?.filter(label =>
-          conversationStore.select_conversation?.label_id?.includes(label?._id)
+          (
+            new_val?.label_id || conversationStore.select_conversation?.label_id
+          )?.includes(label?._id)
         ),
         current_staff_id: chatbotUserStore.chatbot_user?.fb_staff_id,
         current_staff_name: chatbotUserStore.chatbot_user?.full_name,
@@ -650,39 +659,49 @@ class Main {
        * - getPageDetails: lấy thông tin trang
        * - readMarket: lấy widget trên chợ (không critical)
        */
-      const [PAGES, MARKET_WIDGETS] = await Promise.all([
-        // API lấy thông tin trang - critical
-        new N4SerivceAppPage().getPageDetails(
-          orgStore.selected_org_id,
-          SELECTED_PAGE_IDS,
-          true
-        ),
-        // API lấy widget - không critical, catch lỗi để không block
-        new N5AppV1AppApp().readMarket().catch(() => undefined),
-      ])
+      // API lấy widget - không critical, catch lỗi để không block
+      new N5AppV1AppApp()
+        .readMarket()
+        .then(res => (pageStore.market_widgets = res))
+        .catch(() => undefined)
 
-      // nếu không có dữ liệu trang nào thì thôi
-      if (!PAGES) throw $t('v1.view.main.dashboard.chat.error.get_page_info')
+      // API lấy thông tin trang - critical -> chuyển thành không block
+      new N4SerivceAppPage()
+        .getPageDetails(orgStore.selected_org_id, SELECTED_PAGE_IDS, true)
+        .then(PAGES => {
+          // nếu không có dữ liệu trang nào thì thôi
+          if (!PAGES)
+            throw $t('v1.view.main.dashboard.chat.error.get_page_info')
 
-      // lưu dữ liệu trang đã chọn
-      pageStore.selected_page_list_info = PAGES
+          // lưu dữ liệu trang đã chọn
+          pageStore.selected_page_list_info = PAGES
 
-      // lưu dữ liệu nhân viên của các trang đã chọn
-      pageStore.selected_pages_staffs = User.getUsersInfo(PAGES)
+          // lưu dữ liệu nhân viên của các trang đã chọn
+          pageStore.selected_pages_staffs = User.getUsersInfo(PAGES)
 
-      // lưu lại các widget trên chợ, để map cta
-      pageStore.market_widgets = MARKET_WIDGETS
+          // Cập nhật lại token widget khi đã có thông tin page (widget list) đầy đủ
+          if (conversationStore.select_conversation) {
+            getTokenOfWidget(conversationStore.select_conversation)
+          }
 
-      // khởi tạo kết nối socket lên server
-      $socket.connect(
-        $env.host.n3_socket,
-        keys(pageStore.selected_page_id_list),
-        chatbotUserStore.chatbot_user?.fb_staff_id || '',
-        handleSocketEvent
-      )
+          // khởi tạo kết nối socket lên server
+          $socket.connect(
+            $env.host.n3_socket,
+            keys(pageStore.selected_page_id_list),
+            chatbotUserStore.chatbot_user?.fb_staff_id || '',
+            handleSocketEvent
+          )
+        })
+        .catch(e => {
+          console.error(e)
+          // Có thể show toast error ở đây nếu cần
+        })
     } finally {
       // tắt loading initialization
       is_init_loading.value = false
+
+      // Check query params để load widget sớm -> KHÔNG NÊN gọi ở đây vì chưa có page details
+      // Logic gọi getTokenOfWidget đã được handle sau khi getPageDetails xong (.then block)
     }
   }
 

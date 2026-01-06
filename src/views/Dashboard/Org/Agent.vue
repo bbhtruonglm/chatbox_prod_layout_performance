@@ -1,6 +1,7 @@
 <template>
   <iframe
     :src="$main.getUrl()"
+    title="Agent Configuration"
     frameborder="0"
     class="rounded-lg min-h-0 flex-grow bg-white"
   />

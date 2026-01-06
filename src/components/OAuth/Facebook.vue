@@ -12,12 +12,13 @@
       class="relative z-[2] w-full h-full"
       v-if="iframe_src"
       :src="iframe_src"
+      title="Facebook Login"
       frameborder="0"
     />
   </div>
 </template>
 <script setup lang="ts">
-import { container } from 'tsyringe';
+import { container } from 'tsyringe'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { CROSS_LOGIN_URL } from '@/configs/constants/botbanhang'
 import { TriggerEventRef } from '@/utils/helper/TriggerEventRef'

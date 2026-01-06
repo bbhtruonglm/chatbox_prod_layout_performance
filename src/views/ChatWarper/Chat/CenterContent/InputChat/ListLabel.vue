@@ -1,7 +1,15 @@
 <template>
   <div class="py-1">
     <div
-      v-show="labels?.length"
+      v-if="is_loading_init"
+      class="h-6 flex gap-1 items-center px-1 w-full"
+    >
+      <div class="h-6 w-24 bg-white rounded animate-pulse"></div>
+      <div class="h-6 w-24 bg-white rounded animate-pulse"></div>
+      <div class="h-6 w-24 bg-white rounded animate-pulse"></div>
+    </div>
+    <div
+      v-else-if="labels?.length"
       id="chat__select-label"
       :class="is_expand_label ? 'max-h-40 min-h-6' : 'h-6'"
       class="flex gap-1 group"
@@ -51,9 +59,14 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { map, partition, sortBy } from 'lodash'
-import { useCommonStore, useConversationStore, useOrgStore } from '@/stores'
+import {
+  useCommonStore,
+  useConversationStore,
+  useOrgStore,
+  usePageStore,
+} from '@/stores'
 import { loading } from '@/utils/decorator/Loading'
 import { error } from '@/utils/decorator/Error'
 import { container } from 'tsyringe'
@@ -79,6 +92,19 @@ const conversationStore = useConversationStore()
 const $toast = container.resolve(Toast)
 const orgStore = useOrgStore()
 const $external_site = container.resolve(ExternalSite)
+const pageStore = usePageStore()
+
+/** trạng thái loading ban đầu khi chưa có data page */
+const is_loading_init = computed(() => {
+  /** id của page */
+  const PAGE_ID = conversationStore.select_conversation?.fb_page_id
+
+  // nếu chưa có page ID -> loading
+  if (!PAGE_ID) return true
+
+  // nếu đã có page ID nhưng chưa có page info -> loading
+  return !pageStore.selected_page_list_info?.[PAGE_ID]
+})
 
 /**tham chiếu đến div danh sách nhãn */
 const ref_labels = ref<HTMLDivElement>()
@@ -184,6 +210,13 @@ watch(
 watch(
   () => conversationStore.select_conversation?.label_id,
   () => $main.getLabels()
+)
+
+/** Cập nhật danh sách nhãn khi data page được load (async) */
+watch(
+  () => conversationStore.getLabels(),
+  () => $main.getLabels(),
+  { deep: true }
 )
 
 /** lắng nghe trạng thái phím tắt */
