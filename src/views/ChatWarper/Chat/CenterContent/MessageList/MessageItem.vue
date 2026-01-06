@@ -63,7 +63,7 @@
       "
       :message
     />
-    <!-- <SlowReply
+    <SlowReply
       v-if="
         CHECK_SLOW_REPLY.isSlowReply() || CHECK_SLOW_REPLY.isSystemSlowReply()
       "
@@ -79,7 +79,7 @@
             : ''
         }
       `"
-    /> -->
+    />
     <MessageDate
       :class="{
         'right-0': message_type !== 'client',
@@ -100,7 +100,7 @@
       :sender_id="message.sender_id"
       :message_type="message.message_type"
     />
-    <!-- <MessageReaction
+    <MessageReaction
       v-if="
         (message_type === 'client' ||
           message_type === 'page' ||
@@ -123,7 +123,7 @@
       :fb_page_id="message.fb_page_id"
       :sender_id="message.sender_id"
       :message="message"
-    /> -->
+    />
   </div>
 </template>
 <script setup lang="ts">

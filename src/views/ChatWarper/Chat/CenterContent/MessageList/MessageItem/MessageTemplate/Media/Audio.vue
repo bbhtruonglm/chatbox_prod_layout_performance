@@ -3,6 +3,7 @@
     <button
       @click.stop="tooglePlay()"
       class="flex-shrink-0"
+      aria-label="Play"
     >
       <PlayIcon
         v-if="!is_playing"

@@ -217,6 +217,8 @@ onUnmounted(() => {
 watch(
   () => select_conversation.value,
   (new_val, old_val) => {
+    // nếu không thay đổi khách hàng thì thôi
+    if (new_val?.data_key === old_val?.data_key) return
     // * reset danh sách tin nhắn khi đổi khách hàng
     messageStore.list_message = []
 
