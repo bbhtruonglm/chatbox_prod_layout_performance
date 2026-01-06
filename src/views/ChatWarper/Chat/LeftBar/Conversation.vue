@@ -261,9 +261,26 @@ class Main {
     })
 
     /** thêm vào danh sách conversation */
-    conversationStore.conversation_list = {
-      ...conversationStore.conversation_list,
-      ...CONVERSATIONS,
+    if (is_first_time) {
+      const NEW_LIST = { ...CONVERSATIONS }
+      const CURRENT_SELECTED = conversationStore.select_conversation
+
+      // Nếu đang chọn hội thoại mà không có trong list mới -> Đẩy xuống cuối
+      if (CURRENT_SELECTED?.data_key && !NEW_LIST[CURRENT_SELECTED.data_key]) {
+        NEW_LIST[CURRENT_SELECTED.data_key] = CURRENT_SELECTED
+      }
+
+      // Nếu đang chọn hội thoại mà có trong list mới -> Update lại reference
+      if (CURRENT_SELECTED?.data_key && NEW_LIST[CURRENT_SELECTED.data_key]) {
+        selectConversation(NEW_LIST[CURRENT_SELECTED.data_key], true)
+      }
+
+      conversationStore.conversation_list = NEW_LIST
+    } else {
+      conversationStore.conversation_list = {
+        ...conversationStore.conversation_list,
+        ...CONVERSATIONS,
+      }
     }
   }
 

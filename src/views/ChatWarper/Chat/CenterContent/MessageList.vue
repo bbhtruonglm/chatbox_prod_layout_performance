@@ -1,15 +1,15 @@
 <template>
-  <!-- Comment empty message div for testing -->
-  <!-- <div
-    v-show="!select_conversation"
+  <div
+    v-if="!select_conversation"
     class="w-full h-full flex justify-center items-center text-slate-500 gap-1"
   >
     <ChatIcon class="w-5" />
     <div>
       {{ $t('v1.view.main.dashboard.chat.empty_message') }}
     </div>
-  </div> -->
+  </div>
   <div
+    v-else
     id="chat__message-list"
     class="h-full overflow-hidden rounded-b-xl relative"
   >
@@ -17,43 +17,168 @@
       v-if="is_loading && !messageStore.list_message?.length"
       class="absolute inset-0 z-20 bg-[#f4f5fa]"
     /> -->
-    <!-- Test: comment v-if/v-else-if -->
     <div
       v-if="isLockPage()"
       class="text-sm text-red-600 text-center"
     >
       {{ $t('v1.view.main.dashboard.org.lock_free_page_over_quota') }}
     </div>
-    <FullPost v-else-if="select_conversation?.conversation_type === 'POST'" />
+    <FullPost v-else-if="select_conversation.conversation_type === 'POST'" />
     <div
+      v-else
       @scroll="onScrollMessage"
       :id="messageStore.list_message_id"
       class="pt-14 pb-5 pl-2 pr-5 gap-1 flex flex-col h-full overflow-hidden overflow-y-auto bg-[#0015810f] rounded-b-xl"
     >
       <div
+        v-if="is_loading && messageStore.list_message?.length"
+        class="flex flex-col gap-4 pt-4 pb-2 pl-2 pr-5 transition-all"
+      >
+        <div class="flex gap-2.5">
+          <div
+            class="w-8 h-8 rounded-full bg-slate-200 flex-shrink-0 animate-pulse"
+          ></div>
+          <div class="flex flex-col gap-1">
+            <div
+              class="w-[200px] h-10 bg-slate-100 rounded-lg animate-pulse"
+            ></div>
+          </div>
+        </div>
+        <div class="flex gap-2.5 flex-row-reverse">
+          <div class="flex flex-col gap-1 items-end">
+            <div
+              class="w-[240px] h-14 bg-blue-50 rounded-lg animate-pulse"
+            ></div>
+          </div>
+        </div>
+      </div>
+      <!-- <HeaderChat /> -->
+      <div
         v-for="(message, index) of show_list_message"
         :key="message._id"
-        class="py-2 flex"
-        :class="{
-          'justify-end':
-            message.message_type === 'page' || message.message_type === 'note',
-          'justify-start':
-            message.message_type === 'client' ||
-            message.message_type === 'group',
-        }"
+        class="relative"
       >
-        <MessageItem
-          v-if="
-            ['client', 'activity', 'page', 'note', 'group'].includes(
+        <div class="flex flex-col gap-2">
+          <UnReadAlert :index />
+          <TimeSplit
+            :before_message="show_list_message?.[index - 1]"
+            :now_message="message"
+          />
+        </div>
+        <div
+          :class="{
+            'py-2': ['client', 'page', 'note', 'group'].includes(
               message.message_type
-            ) && !message.ad_id
-          "
-          :message="message"
-          :message_index="index"
+            ),
+          }"
+          class="flex gap-1 relative"
+        >
+          <div
+            v-if="
+              (message.message_type === 'client' && !message.ad_id) ||
+              message.message_type === 'group' ||
+              message.fb_post_id
+            "
+            class="flex-shrink-0"
+          >
+            <ClientAvatar
+              :conversation="select_conversation"
+              :avatar="message?.group_client_avatar"
+              class="w-8 h-8"
+            />
+          </div>
+          <div
+            :class="{
+              'items-end':
+                ['page', 'note'].includes(message.message_type) ||
+                message.ad_id,
+            }"
+            class="relative flex flex-col flex-grow min-w-0"
+          >
+            <MessageItem
+              v-if="
+                ['client', 'activity', 'page', 'note', 'group'].includes(
+                  message.message_type
+                ) && !message.ad_id
+              "
+              :message="message"
+              :message_index="index"
+            />
+            <div
+              v-else-if="message.message_type === 'system'"
+              class="text-center px-20"
+            >
+              <SystemMessage
+                v-if="message.message_text"
+                :text="message.message_text"
+              />
+              <!-- <UnsupportMessage v-else /> -->
+            </div>
+            <template
+              v-else-if="message.message_type === 'client' && message.ad_id"
+            >
+              <PostTemplate
+                :message
+                :message_index="index"
+              />
+            </template>
+
+            <PostTemplate
+              v-else-if="
+                message.platform_type === 'FB_POST' && message.fb_post_id
+              "
+              :message
+              :message_index="index"
+            />
+            <!-- <UnsupportMessage
+              v-else-if="
+                message.message_mid && message.message_mid !== 'undefined'
+              "
+            /> -->
+            <DoubleCheckIcon
+              v-if="isLastPageMessage(message, index)"
+              class="w-3 h-3 text-green-500 absolute -bottom-1.5 -right-11"
+            />
+          </div>
+          <PageStaffAvatar
+            :message
+            v-if="
+              ['page', 'note'].includes(message.message_type) || message.ad_id
+            "
+          />
+          <ClientRead
+            @change_last_read_message="visibleFirstClientReadAvatar"
+            :time="message.time"
+          />
+        </div>
+        <StaffRead
+          @change_last_read_message="visibleLastStaffReadAvatar"
+          :time="message.time"
         />
       </div>
+      <div
+        v-for="message of messageStore.send_message_list"
+        :key="message.temp_id"
+        class="relative group flex flex-col gap-1 items-end py-2"
+      >
+        <div class="message-size group relative flex gap-1 items-end">
+          <PageTempTextMessage
+            :text="message.text"
+            :mentions="message.mentions"
+            :snap_replay_message="message.snap_replay_message"
+            :is_error="message.error"
+          />
+          <!-- :class="{
+            'border border-red-500 rounded-lg': message.error,
+          }" -->
+          <StaffAvatar
+            :id="chatbotUserStore.chatbot_user?.user_id"
+            class="w-6 h-6 rounded-oval flex-shrink-0"
+          />
+        </div>
+        <SendStatus :is_error="message.error" />
+      </div>
     </div>
-    <!-- Code cleaned up -->
   </div>
 </template>
 <script setup lang="ts">
@@ -475,7 +600,7 @@ function getListMessage(is_scroll?: boolean) {
  */
 const visibleFirstClientReadAvatar = debounce(() => {
   /** danh sách các phần tử avatar đánh dấu khách đọc */
-  const ELEMENTS = document.querySelectorAll('.mesage-client-read')
+  const ELEMENTS = document.querySelectorAll('.message-client-read')
   // nếu không có thì thôi
   if (!ELEMENTS?.length) return
   // nếu có thì ẩn tất cả chỉ hiện phần tử cuối cùng

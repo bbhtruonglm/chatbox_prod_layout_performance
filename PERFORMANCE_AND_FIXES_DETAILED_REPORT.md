@@ -89,3 +89,20 @@ Người test (QA) cần focus vào các kịch bản sau để đảm bảo an 
 
 **Kết luận Deploy:**
 Các thay đổi chủ yếu là **Safe Refactor** và **UX Patching**. Logic core của hệ thống (API calls, data processing) không bị thay đổi cấu trúc lớn. Rủi ro regression (lỗi lặp lại) là thấp nếu pass qua checklist trên.
+
+### D. Module: API Optimization & Initial Load Logic (New)
+
+Vấn đề API `read_message` gọi trùng lặp (4 lần) và Thứ tự hiển thị hội thoại sai logic khi load lần đầu.
+
+| File               | Function / Component         | Chi tiết Thay đổi                                                                                                                                                                                                                                                                                                                    | Mục đích                                                                                                                                                                                                                 |
+| :----------------- | :--------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MessageList.vue`  | `watch(select_conversation)` | **Optimization:**<br>- Thêm check `new_val?.data_key === old_val?.data_key`.<br>- Nếu key giống nhau thì `return`.                                                                                                                                                                                                                   | **Giảm 50% API Calls:** Ngăn chặn việc load lại tin nhắn không cần thiết khi object hội thoại thay đổi reference (do API update) nhưng bản chất vẫn là hội thoại đó. Fix lỗi `read_message` gọi 4 lần -> 2 lần.          |
+| `Conversation.vue` | `getConversation()`          | **Logic Logic:**<br>- Load lần đầu (`is_first_time`):<br> 1. Ưu tiên thứ tự từ API trả về (`CONVERSATIONS`).<br> 2. Nếu hội thoại đang chọn (`CURRENT_SELECTED`) **không** nằm trong list API -> Đưa xuống cuối.<br> 3. Nếu có trong list -> Update reference và hiển thị đúng vị trí API.<br>- Load các lần sau: Merge bình thường. | **Fix Initial Order:**<br>- Đảm bảo hội thoại được chọn (từ URL/Search) hiển thị đúng context.<br>- Nếu nó "cũ" (ngoài page 1) -> hiện cuối để tracking.<br>- Nếu nó "mới" (trong page 1) -> hiện đúng thứ tự thời gian. |
+
+### E. Module: UI Restoration (Testing Revert)
+
+Đã khôi phục lại toàn bộ UI của `MessageList` theo yêu cầu (Avatars, DoubleCheck, Read Status) sau khi validation performance.
+
+| File              | Component | Chi tiết                                                                                                                                                  |
+| :---------------- | :-------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MessageList.vue` | Template  | - Khôi phục `ClientAvatar`, `PageStaffAvatar`.<br>- Khôi phục `DoubleCheckIcon`, `ClientRead`, `StaffRead`.<br>- Sửa lỗi typo class `mesage-client-read`. |
