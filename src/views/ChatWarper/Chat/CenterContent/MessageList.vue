@@ -18,13 +18,13 @@
       class="absolute inset-0 z-20 bg-[#f4f5fa]"
     /> -->
     <!-- Test: comment v-if/v-else-if -->
-    <!-- <div
+    <div
       v-if="isLockPage()"
       class="text-sm text-red-600 text-center"
     >
       {{ $t('v1.view.main.dashboard.org.lock_free_page_over_quota') }}
     </div>
-    <FullPost v-else-if="select_conversation?.conversation_type === 'POST'" /> -->
+    <FullPost v-else-if="select_conversation?.conversation_type === 'POST'" />
     <div
       @scroll="onScrollMessage"
       :id="messageStore.list_message_id"

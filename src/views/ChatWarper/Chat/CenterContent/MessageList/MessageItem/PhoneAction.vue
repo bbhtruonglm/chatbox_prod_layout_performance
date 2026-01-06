@@ -1,29 +1,36 @@
 <template>
   <div
-    v-if="
-      message?.client_phone &&
-      message_type == 'client'
-    "
+    v-if="message?.client_phone && message_type == 'client'"
     class="flex items-center py-1.5 gap-2"
   >
     <button
       v-if="pageStore.zlp_oss?.length"
-      @click="()=>{
-        message_data = message
-        modal_zalo_personal_ref?.toggleModal()
-      }"
+      @click="
+        () => {
+          message_data = message
+          modal_zalo_personal_ref?.toggleModal()
+        }
+      "
       v-tooltip="$t('Zalo cá nhân')"
       class="w-6 h-6 flex justify-center items-center rounded-full border border-blue-700 bg-blue-100"
+      :aria-label="$t('Zalo cá nhân')"
     >
-      <Zalo class="w-3 h-3"></Zalo>
+      <Zalo
+        class="w-3 h-3"
+        alt="zalo_icon"
+      ></Zalo>
     </button>
     <button
       v-if="orgStore.selected_org_info?.org_package?.org_allow_message_action"
       @click="$main.openCallCenter()"
       v-tooltip="$t('Gọi điện')"
       class="w-6 h-6 flex justify-center items-center rounded-full border border-green-600 bg-green-100"
+      :aria-label="$t('Gọi điện')"
     >
-      <PhoneIcon class="w-3 h-3 text-green-600"></PhoneIcon>
+      <PhoneIcon
+        class="w-3 h-3 text-green-600"
+        alt="phone_icon"
+      ></PhoneIcon>
     </button>
     <Widget
       ref="modal_widget_ref"
@@ -39,7 +46,7 @@
 import Widget from '@/views/ChatWarper/Chat/CenterContent/MessageList/MessageItem/MessageTemplate/Widget.vue'
 // import ZaloPersonalModal from '@/views/ChatWarper/Chat/CenterContent/MessageList/MessageItem/PhoneAction/ZaloPersonalModal.vue'
 import { computed, ref } from 'vue'
-import { storeToRefs } from 'pinia';
+import { storeToRefs } from 'pinia'
 
 import type { MessageInfo } from '@/service/interface/app/message'
 import { Parser } from '@/utils/helper/Parser'
@@ -47,7 +54,12 @@ import { Parser } from '@/utils/helper/Parser'
 //* icon
 import Zalo from '@/components/Icons/Zalo.vue'
 import type { AppInstalledInfo } from '@/service/interface/app/widget'
-import { useConversationStore, useMessageStore, useOrgStore, usePageStore } from '@/stores'
+import {
+  useConversationStore,
+  useMessageStore,
+  useOrgStore,
+  usePageStore,
+} from '@/stores'
 import { PhoneIcon } from '@heroicons/vue/24/solid'
 
 const $props = withDefaults(

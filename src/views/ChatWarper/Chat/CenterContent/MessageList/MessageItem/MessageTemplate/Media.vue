@@ -15,6 +15,7 @@
             : data_source?.image?.url
         "
         class="w-full h-full object-contain"
+        alt="media_image"
       />
     </div>
     <div
@@ -26,6 +27,7 @@
         class="w-full h-full"
         controls
         preload="metadata"
+        alt="media_video"
       >
         <source
           :src="getVideoUrl()"
@@ -41,6 +43,7 @@
           : data_source?.audio?.url
       "
       class="min-w-52"
+      alt="media_audio"
     />
     <div
       v-if="data_source?.file?.url"

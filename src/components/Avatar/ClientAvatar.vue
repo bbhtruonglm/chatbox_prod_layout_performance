@@ -177,27 +177,39 @@ function removeAnimatePulse() {
 }
 /**tạo url ảnh */
 function loadImageUrl(platform_type?: PageType) {
+  const PARAMS = `?width=${$props.actual_size * 2}&height=${
+    $props.actual_size * 2
+  }`
+
   if (platform_type === 'FB_INSTAGRAM')
-    return $cdn.igClientAvt(
-      $props.conversation?.fb_page_id,
-      $props.conversation?.fb_client_id
+    return (
+      $cdn.igClientAvt(
+        $props.conversation?.fb_page_id,
+        $props.conversation?.fb_client_id
+      ) + PARAMS
     )
   if (platform_type === 'TIKTOK') {
-    return $cdn.tiktokClientAvt(
-      $props.conversation?.fb_page_id,
-      $props.conversation?.fb_client_id
+    return (
+      $cdn.tiktokClientAvt(
+        $props.conversation?.fb_page_id,
+        $props.conversation?.fb_client_id
+      ) + PARAMS
     )
   }
-  return $cdn.fbClientAvt(
-    $props.conversation?.fb_page_id,
-    $props.conversation?.fb_client_id
+  return (
+    $cdn.fbClientAvt(
+      $props.conversation?.fb_page_id,
+      $props.conversation?.fb_client_id
+    ) + PARAMS
   )
 }
 /**khi ảnh load thất bại thì thay thế ảnh mặc định vào */
 function onImageError($event: Event) {
   const image = $event.target as HTMLImageElement
 
-  image.src = `${$env.img_host}/1111111111?width=${$props.actual_size}&height=${$props.actual_size}`
+  image.src = `${$env.img_host}/1111111111?width=${
+    $props.actual_size * 2
+  }&height=${$props.actual_size * 2}`
 }
 
 class Main {
@@ -217,7 +229,10 @@ class Main {
     const FROM_ID = $props.comment?.from?.id
 
     // trả về url ảnh
-    return this.SERVICE_CDN.fbClientAvt(PAGE_ID, FROM_ID)
+    return (
+      this.SERVICE_CDN.fbClientAvt(PAGE_ID, FROM_ID) +
+      `?width=${$props.actual_size * 2}&height=${$props.actual_size * 2}`
+    )
   }
 }
 const $main = new Main()

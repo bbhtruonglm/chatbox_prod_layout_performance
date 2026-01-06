@@ -588,7 +588,7 @@ class Main {
     }
 
     /** reset data */
-    // conversationStore.conversation_list = {}
+    conversationStore.conversation_list = {}
 
     /** reset phân trang */
     after.value = undefined
