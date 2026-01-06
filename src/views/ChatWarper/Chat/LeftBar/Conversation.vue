@@ -175,7 +175,8 @@ class Main {
   @error()
   async getConversation(is_first_time?: boolean, is_pick_first?: boolean) {
     /** lưu trạng thái có phải load lần đầu không */
-    conversationStore.is_loading_list = !!is_first_time
+    if (!conversationStore.option_filter_page_data.search)
+      conversationStore.is_loading_list = !!is_first_time
 
     /** nếu đang mất mạng thì không cho gọi api */
     if (!commonStore.is_connected_internet) return
@@ -339,10 +340,13 @@ class Main {
         }
 
         // Chọn hội thoại này
-        selectConversation(FIRST_CONV, false)
+        selectConversation(FIRST_CONV, true)
 
         /** Đẩy ID lên URL params để đồng bộ */
         setParamChat($router, FIRST_CONV.fb_page_id, FIRST_CONV.fb_client_id)
+      } else {
+        conversationStore.select_conversation = undefined
+        setParamChat($router)
       }
     } catch (e) {
       console.error(e)

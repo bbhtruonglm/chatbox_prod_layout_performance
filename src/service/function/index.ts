@@ -119,6 +119,14 @@ export const selectConversation = (
     }
   )
 
+  // Nếu đang search, và không phải do user click (disabled_focus !== false), thì force disable focus
+  if (
+    conversationStore.option_filter_page_data.search &&
+    is_disable_focus !== false
+  ) {
+    is_disable_focus = true
+  }
+
   // tự động focus vào input chat
   if (!is_disable_focus)
     document.getElementById('chat-text-input-message')?.focus()
@@ -368,8 +376,8 @@ export function getLocale() {
 /**cài đặt id trang và user cho chat */
 export function setParamChat(
   $router: Router,
-  page_id: string,
-  client_id: string
+  page_id?: string,
+  client_id?: string
 ) {
   // $router.replace({ query: { p: page_id, u: client_id } })
 

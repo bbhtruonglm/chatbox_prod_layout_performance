@@ -225,7 +225,7 @@ class Main {
     }
 
     /** logic chọn hội thoại mới */
-    selectConversation(CONVERSATION)
+    selectConversation(CONVERSATION, false)
 
     /** xóa hội thoại trước đó khỏi danh sách nếu */
     if (
