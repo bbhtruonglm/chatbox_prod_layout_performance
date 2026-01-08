@@ -45,8 +45,8 @@
       />
       <p
         v-if="
-          ref_message_content?.clientHeight &&
-          ref_message_content.clientHeight >= MAX_HEIGHT_CONTENT
+          ref_message_content?.scrollHeight &&
+          ref_message_content.scrollHeight > MAX_HEIGHT_CONTENT
         "
         @click="is_view_full = !is_view_full"
         class="cursor-pointer select-none text-xs text-blue-500 mt-1"
