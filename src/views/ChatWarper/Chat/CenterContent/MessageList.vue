@@ -635,23 +635,25 @@ function getListMessage(is_scroll?: boolean) {
  * chỉ hiển thị avatar khách hàng đã đọc đến tin nhắn đầu tiên
  * vì cùng mội thời điểm sẽ có nhiều div thoả mãn điều kiện gửi event
  * nên sử dụng debounce để chỉ chạy event cuối cùng, tránh bị lặp code
+ *
+ * Với column-reverse: tin mới nhất ở đầu DOM nên hiển thị avatar đầu tiên
  */
 const visibleFirstClientReadAvatar = debounce(() => {
   /** danh sách các phần tử avatar đánh dấu khách đọc */
   const ELEMENTS = document.querySelectorAll('.message-client-read')
   // nếu không có thì thôi
   if (!ELEMENTS?.length) return
-  // nếu có thì ẩn tất cả chỉ hiện phần tử cuối cùng
+  // với column-reverse: hiển thị avatar ĐẦU TIÊN (tin mới nhất)
   ELEMENTS.forEach((el, index) => {
     /** phần tử avatar đánh dấu khách đọc */
     const ELEMENT = el as HTMLElement
     // nếu không có thì thôi
     if (!ELEMENT) return
-    // nếu là phần tử cuối cùng thì hiện
-    if (index === ELEMENTS.length - 1) {
+    // với column-reverse: hiển thị avatar đầu tiên (index 0) - tin mới nhất
+    if (index === 0) {
       ELEMENT.style.display = 'block'
     }
-    // nếu khác phần tử cuối cùng thì ẩn
+    // ẩn các avatar còn lại
     else {
       ELEMENT.style.display = 'none'
     }
@@ -661,6 +663,8 @@ const visibleFirstClientReadAvatar = debounce(() => {
  * chỉ hiển thị avatar nhân viên đã đọc tin nhắn cuối cùng
  * vì cùng mội thời điểm sẽ có nhiều div thoả mãn điều kiện gửi event
  * nên sử dụng debounce để chỉ chạy event cuối cùng, tránh bị lặp code
+ *
+ * Với column-reverse: tin mới nhất ở đầu DOM nên hiển thị avatar đầu tiên
  */
 function visibleLastStaffReadAvatar(staff_id: string) {
   // init hàm debounce cho từng staff nếu không tồn tại
@@ -670,7 +674,7 @@ function visibleLastStaffReadAvatar(staff_id: string) {
   // chạy hàm debounce
   list_debounce_staff.value[staff_id](staff_id)
 
-  /**hiển thị avatar staff cuối cùng */
+  /**hiển thị avatar staff đầu tiên (tin mới nhất với column-reverse) */
   function doVisibleAvatar(staff_id: string) {
     /**toàn bộ các div avatar */
     const LIST_AVATAR: HTMLElement[] = Array.from(
@@ -679,10 +683,10 @@ function visibleLastStaffReadAvatar(staff_id: string) {
 
     // lặp qua toàn bộ các div
     LIST_AVATAR.forEach((element: any, i: number) => {
-      // reset ẩn toàn bộ các avatar hiện tại (dùng display:none để không chiếm không gian)
-      if (i < LIST_AVATAR.length - 1) element.style.display = 'none'
-      // chỉ hiển thị avatar cuối cùng
-      else element.style.display = 'block'
+      // với column-reverse: hiển thị avatar ĐẦU TIÊN (index 0) - tin mới nhất
+      if (i === 0) element.style.display = 'block'
+      // ẩn các avatar còn lại
+      else element.style.display = 'none'
     })
   }
 }
