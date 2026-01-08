@@ -122,7 +122,7 @@
             /> -->
             <DoubleCheckIcon
               v-if="isLastPageMessage(message, index)"
-              class="w-3 h-3 text-green-500 absolute -bottom-1.5 -right-11"
+              class="w-3 h-3 text-green-500 absolute -bottom-0.5 -right-12"
             />
           </div>
           <PageStaffAvatar
