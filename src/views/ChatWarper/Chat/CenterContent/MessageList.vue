@@ -28,14 +28,14 @@
       v-else
       @scroll="onScrollMessage"
       :id="messageStore.list_message_id"
-      class="pt-14 pb-5 px-4 gap-1 flex flex-col h-full overflow-hidden overflow-y-auto bg-[#0015810f] rounded-b-xl"
+      class="pt-14 pb-5 px-4 gap-1 flex flex-col-reverse h-full overflow-hidden overflow-y-auto bg-[#0015810f] rounded-b-xl"
+      style="overflow-anchor: auto"
     >
+      <!-- Anchor element để giữ scroll position khi load more -->
       <div
-        class="absolute top-0 left-1/2 -translate-x-1/2 z-10"
-        v-if="is_loading && messageStore.list_message?.length"
-      >
-        <!-- <LoadingSpinner size="md" /> -->
-      </div>
+        id="scroll-anchor"
+        style="overflow-anchor: auto; height: 1px"
+      ></div>
 
       <!-- <HeaderChat /> -->
       <div
@@ -142,10 +142,11 @@
           class="flex justify-end"
         />
       </div>
+      <!-- [SEND_MESSAGE_LIST] Hiển thị tin nhắn đang gửi - đặt trước vì column-reverse -->
       <div
         v-for="message of messageStore.send_message_list"
         :key="message.temp_id"
-        class="relative group flex flex-col gap-1 items-end py-2"
+        class="relative group flex flex-col gap-1 items-end py-2 order-first"
       >
         <div class="message-size group relative flex gap-1 items-end">
           <PageTempTextMessage
@@ -154,9 +155,6 @@
             :snap_replay_message="message.snap_replay_message"
             :is_error="message.error"
           />
-          <!-- :class="{
-            'border border-red-500 rounded-lg': message.error,
-          }" -->
           <StaffAvatar
             :id="chatbotUserStore.chatbot_user?.user_id"
             class="w-6 h-6 rounded-oval flex-shrink-0"
@@ -179,7 +177,7 @@ import {
 import { flow } from '@/service/helper/async'
 import { read_message } from '@/service/api/chatbox/n4-service'
 import { toastError } from '@/service/helper/alert'
-import { getPageInfo, scrollToBottomMessage } from '@/service/function'
+import { getPageInfo } from '@/service/function'
 import { debounce, findLastIndex, remove, size } from 'lodash'
 
 import FullPost from '@/views/ChatWarper/Chat/CenterContent/MessageList/FullPost.vue'
@@ -239,6 +237,8 @@ const LIMIT = 20
 let old_scroll_height = ref(0)
 /** giá trị từ vị trí scroll tới cuối danh sách tin nhắn trước đó */
 const old_position_to_bottom = ref(0)
+/** cờ để ngăn trigger load more liên tục sau khi vừa load xong */
+let is_just_loaded = false
 /**danh sách các hàm debounce cho từng staff */
 const list_debounce_staff = ref<{
   [index: string]: DebouncedFunc<any>
@@ -249,35 +249,37 @@ const select_conversation = computed(() => {
   return conversationStore.select_conversation
 })
 
-/** danh sách tin nhắn */
-const show_list_message = computed(() =>
-  // xử lý logic hiển thị tin nhắn
-  messageStore.list_message.filter(message => {
+/** danh sách tin nhắn - đảo ngược để dùng với flex-direction: column-reverse */
+const show_list_message = computed(() => {
+  /** lọc và lấy danh sách tin nhắn cần hiển thị */
+  const FILTERED_MESSAGES = messageStore.list_message.filter(message => {
     // 1. Quan trọng: Nếu là tin nhắn quảng cáo (có ad_id) -> luôn hiển thị
     if (message.ad_id) return true
     // 2. Nếu là tin nhắn post (có fb_post_id) -> luôn hiển thị
     if (message.fb_post_id) return true
 
-    // 2. Nếu có nội dung text hoặc postback -> hiển thị
+    // 3. Nếu có nội dung text hoặc postback -> hiển thị
     if (message.message_text || message.postback_title) return true
-    /**  Khai báo attachments */
+    /** Khai báo attachments */
     const ATTACHMENTS = message.message_attachments
-    // 2. Nếu không có attachments (và không có text) -> ẩn
+    // 4. Nếu không có attachments (và không có text) -> ẩn
     if (!ATTACHMENTS?.length) return false
 
-    // 3. Kiểm tra xem có attachment nào hợp lệ để hiển thị không
+    // 5. Kiểm tra xem có attachment nào hợp lệ để hiển thị không
     const HAS_VALID_ATTACHMENT = ATTACHMENTS.some(att => {
       // Nếu không phải template (ảnh, video...) -> hiển thị
       // Hoặc nếu là template thì phải có payload -> hiển thị
       if (att.type !== 'template' || att.payload) return true
-      // Nếu là template thì phải có payload -> hiển thị
       return false
     })
 
     // Trả về true nếu có attachment hợp lệ
     return HAS_VALID_ATTACHMENT
   })
-)
+
+  // Đảo ngược danh sách để tin cũ nhất ở cuối (vì column-reverse sẽ render từ dưới lên)
+  return [...FILTERED_MESSAGES].reverse()
+})
 
 /**vị trí của tin nhắn cuối cùng nhân viên gửi */
 const last_client_message_index = computed(() =>
@@ -425,8 +427,7 @@ function socketNewMessage({ detail }: CustomEvent) {
         (message.replay_mid && message.replay_mid === detail?.replay_mid)
     )
 
-  // nếu đang ở vị trí bottom thì dùng scrollToBottomMessage
-  if (IS_BOTTOM) scrollToBottomMessage(messageStore.list_message_id)
+  // với column-reverse, tin mới tự động hiển thị ở bottom nên không cần scroll
 }
 /**xử lý socket cập nhật tin nhắn hiện tại */
 function socketUpdateMssage({ detail }: CustomEvent) {
@@ -461,43 +462,91 @@ const debounceLoadMoreMessage = debounce(
   300
 )
 
-/**ẩn hiện nút về bottom */
+/**
+ * Ẩn hiện nút về bottom
+ * Với column-reverse:
+ * - scrollTop = 0 → đang ở bottom (tin mới nhất)
+ * - scrollTop < 0 (âm) → đang scroll lên xem tin cũ
+ */
 function handleButtonToBottom($event: UIEvent) {
-  /**div chưa danh sách tin nhắn */
+  /** div chứa danh sách tin nhắn */
   const LIST_MESSAGE = $event?.target as HTMLElement
 
-  let { scrollHeight, scrollTop, clientHeight } = LIST_MESSAGE
+  /** với column-reverse, scrollTop là số âm, 0 là bottom */
+  const SCROLL_TOP = LIST_MESSAGE.scrollTop
 
-  /**giá trị khoảng cách scroll với bottom */
-  const SCROLL_BOTTOM = scrollHeight - scrollTop - clientHeight
+  // DEBUG: xem giá trị scrollTop
+  // console.log(
+  //   '[DEBUG] scrollTop:',
+  //   SCROLL_TOP,
+  //   'is_show_to_bottom:',
+  //   messageStore.is_show_to_bottom
+  // )
 
   /**
    * xử lý như thế này để giảm tải việc thay đổi store liên tục, nếu không
    * có khả năng bị lag, treo, khi có nhiều nơi watch store, send event mà
    * mình không phát hiện ra
    */
-  if (SCROLL_BOTTOM > 400 && !messageStore.is_show_to_bottom) {
+  // với column-reverse: scrollTop < -100 nghĩa là đang scroll lên xem tin cũ → hiện nút
+  if (SCROLL_TOP < -100 && !messageStore.is_show_to_bottom) {
+    console.log('[DEBUG] Hiện nút scroll to bottom')
     messageStore.is_show_to_bottom = true
   }
-  if (SCROLL_BOTTOM <= 400 && messageStore.is_show_to_bottom) {
+  // scrollTop >= -100 (gần 0) nghĩa là gần bottom (tin mới) → ẩn nút
+  if (SCROLL_TOP >= -100 && messageStore.is_show_to_bottom) {
+    console.log('[DEBUG] Ẩn nút scroll to bottom')
     messageStore.is_show_to_bottom = false
   }
 }
-/**load thêm dữ liệu khi lăn chuột lên trên */
+/**
+ * Load thêm dữ liệu khi lăn chuột lên trên
+ * Với column-reverse:
+ * - scrollTop = 0 → đang ở bottom (tin mới nhất)
+ * - scrollTop âm (gần MIN_SCROLL) → đang ở top (tin cũ nhất) → trigger load more
+ */
 function loadMoreMessage($event: UIEvent) {
-  /**div chưa danh sách tin nhắn */
+  /** div chứa danh sách tin nhắn */
   const LIST_MESSAGE = $event?.target as HTMLElement
 
   if (!LIST_MESSAGE) return
 
-  /**giá trị scroll top hiện tại */
-  const SCROLL_TOP = LIST_MESSAGE?.scrollTop
+  /**
+   * Với column-reverse:
+   * - scrollHeight: tổng chiều cao nội dung
+   * - clientHeight: chiều cao viewport
+   * - scrollTop: số âm, 0 là bottom
+   * - MIN_SCROLL (số âm nhất) = -(scrollHeight - clientHeight)
+   */
+  const MIN_SCROLL = -(LIST_MESSAGE.scrollHeight - LIST_MESSAGE.clientHeight)
 
-  // nếu đang chạy hoặc đã hết dữ liệu thì thôi
-  if (is_loading.value || is_done.value) return
+  /** khoảng cách từ vị trí scroll hiện tại đến top (tin cũ nhất) */
+  const DISTANCE_TO_TOP = LIST_MESSAGE.scrollTop - MIN_SCROLL
 
-  // infinitve loading scroll
-  if (SCROLL_TOP < 500) getListMessage()
+  // DEBUG: xem giá trị
+  // console.log(
+  //   '[DEBUG] DISTANCE_TO_TOP:',
+  //   DISTANCE_TO_TOP,
+  //   'scrollTop:',
+  //   LIST_MESSAGE.scrollTop,
+  //   'MIN_SCROLL:',
+  //   MIN_SCROLL
+  // )
+
+  // nếu đang chạy, đã hết dữ liệu, hoặc vừa load xong thì thôi
+  if (is_loading.value || is_done.value || is_just_loaded) return
+
+  // với column-reverse: scroll gần top (tin cũ) thì load thêm - trigger ở 400px
+  if (DISTANCE_TO_TOP < 400) {
+    // console.log('[DEBUG] Trigger load more!')
+    // đặt cờ để ngăn trigger liên tục
+    is_just_loaded = true
+    getListMessage()
+    // reset cờ sau 500ms
+    setTimeout(() => {
+      is_just_loaded = false
+    }, 500)
+  }
 }
 /**đọc danh sách tin nhắn */
 function getListMessage(is_scroll?: boolean) {
@@ -513,7 +562,7 @@ function getListMessage(is_scroll?: boolean) {
 
   flow(
     [
-      // * bật loading
+      // * bật loading và tắt smooth scroll tạm thời
       (cb: CbError) => {
         is_loading.value = true
 
@@ -522,32 +571,42 @@ function getListMessage(is_scroll?: boolean) {
           messageStore.list_message_id
         )
 
-        /** nếu có thì thôi */
+        /** nếu không có thì thôi */
         if (!LIST_MESSAGE) return cb()
 
-        /** lưu lại bị vị trí scroll hiện tại */
-        old_position_to_bottom.value =
-          LIST_MESSAGE?.scrollHeight - LIST_MESSAGE?.scrollTop
+        // Tắt smooth scroll tạm thời để tránh animation khi DOM update
+        LIST_MESSAGE.style.scrollBehavior = 'auto'
+
+        // console.log(
+        //   '[DEBUG] Start loading - scrollTop:',
+        //   LIST_MESSAGE.scrollTop
+        // )
 
         cb()
       },
       // * đọc dữ liệu từ api
       (cb: CbError) => tryLoadUntilScrollable(cb),
-      // * làm cho scroll to top mượt hơn
+      // * overflow-anchor sẽ tự giữ scroll position
+      // * chỉ cần tắt smooth scroll tạm thời để tránh animation không mong muốn
       (cb: CbError) => {
-        // chạy infinitve loading scroll
         nextTick(() => {
-          // lấy div chưa danh sách tin nhắn
+          /** lấy div chứa danh sách tin nhắn */
           const LIST_MESSAGE = document.getElementById(
             messageStore.list_message_id
           )
 
-          /** nếu không có thì thôi */
+          // nếu không có thì thôi
           if (!LIST_MESSAGE) return cb()
 
-          // Scroll lại div cho về đúng giá trị trước -> gần như mượt
-          LIST_MESSAGE.scrollTop =
-            LIST_MESSAGE.scrollHeight - old_position_to_bottom.value
+          // Bật lại smooth scroll sau khi DOM đã update
+          if (!is_scroll) {
+            // LIST_MESSAGE.style.scrollBehavior = 'smooth'
+          }
+
+          // console.log(
+          //   '[DEBUG] Load more complete - scrollTop:',
+          //   LIST_MESSAGE.scrollTop
+          // )
         })
 
         cb()
@@ -565,19 +624,10 @@ function getListMessage(is_scroll?: boolean) {
       }
 
       // tắt loading
-      if (!is_scroll) is_loading.value = false
+      is_loading.value = false
 
-      // load lần đầu thì tự động cuộn xuống
-      if (is_scroll) {
-        // tự động cuộn xuống
-        scrollToBottomMessage(messageStore.list_message_id)
-        // tắt loading sau khi scroll sau 0.3s
-        setTimeout(() => {
-          scrollToBottomMessage(messageStore.list_message_id)
-          // tắt loading sau khi scroll
-          is_loading.value = false
-        }, 300)
-      }
+      // với column-reverse, tin nhắn mới nhất tự động ở bottom
+      // không cần scrollToBottom nữa
     }
   )
 }
@@ -696,5 +746,10 @@ const tryLoadUntilScrollable = (cb: CbError) => {
 .message-size {
   @apply max-w-96;
   width: fit-content;
+}
+
+/** Container chứa danh sách tin nhắn - thêm smooth scroll */
+:deep(#chat__message-list > div) {
+  scroll-behavior: smooth;
 }
 </style>

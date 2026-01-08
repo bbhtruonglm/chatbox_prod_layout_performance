@@ -132,7 +132,10 @@ export const selectConversation = (
     document.getElementById('chat-text-input-message')?.focus()
 }
 
-/**cuộn xuống cuối trang */
+/**
+ * Cuộn xuống cuối trang (tin nhắn mới nhất)
+ * Với column-reverse: scrollTop = 0 là bottom (tin mới nhất)
+ */
 export const scrollToBottomMessage = (id?: string) => {
   /** id của danh sách tin nhắn */
   const ID = id || 'list-message'
@@ -141,11 +144,11 @@ export const scrollToBottomMessage = (id?: string) => {
 
   if (!LIST_MESSAGE) return
 
-  // html được render thì mới cuộn
-  nextTick(() => {
-    setTimeout(() => {
-      LIST_MESSAGE.scrollTop = LIST_MESSAGE.scrollHeight
-    }, 200)
+  // với column-reverse, scrollTop = 0 là bottom
+  // dùng scrollTo với behavior: smooth để scroll mượt
+  LIST_MESSAGE.scrollTo({
+    top: 0,
+    // behavior: 'smooth',
   })
 }
 
