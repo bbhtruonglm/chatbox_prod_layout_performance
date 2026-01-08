@@ -31,7 +31,7 @@
       class="pt-14 pb-5 pl-2 pr-5 gap-1 flex flex-col h-full overflow-hidden overflow-y-auto bg-[#0015810f] rounded-b-xl"
     >
       <div
-        class="absolute top-16 left-1/2 -translate-x-1/2 z-10"
+        class="absolute top-0 left-1/2 -translate-x-1/2 z-10"
         v-if="is_loading && messageStore.list_message?.length"
       >
         <LoadingSpinner size="md" />

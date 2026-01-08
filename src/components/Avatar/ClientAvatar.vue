@@ -116,21 +116,27 @@ function loadImageUrl(platform_type?: PageType) {
       $cdn.igClientAvt(
         $props.conversation?.fb_page_id,
         $props.conversation?.fb_client_id
-      ) + PARAMS
+      ) +
+      '.png' +
+      PARAMS
     )
   if (platform_type === 'TIKTOK') {
     return (
       $cdn.tiktokClientAvt(
         $props.conversation?.fb_page_id,
         $props.conversation?.fb_client_id
-      ) + PARAMS
+      ) +
+      '.png' +
+      PARAMS
     )
   }
   return (
     $cdn.fbClientAvt(
       $props.conversation?.fb_page_id,
       $props.conversation?.fb_client_id
-    ) + PARAMS
+    ) +
+    '.png' +
+    PARAMS
   )
 }
 /**khi ảnh load thất bại thì thay thế ảnh mặc định vào */
@@ -161,7 +167,7 @@ class Main {
     // trả về url ảnh
     return (
       this.SERVICE_CDN.fbClientAvt(PAGE_ID, FROM_ID) +
-      `?width=${$props.actual_size * 2}&height=${$props.actual_size * 2}`
+      `.png?width=${$props.actual_size * 2}&height=${$props.actual_size * 2}`
     )
   }
 }
