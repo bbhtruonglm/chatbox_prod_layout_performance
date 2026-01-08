@@ -28,7 +28,7 @@
       v-else
       @scroll="onScrollMessage"
       :id="messageStore.list_message_id"
-      class="pt-14 pb-5 pl-2 pr-5 gap-1 flex flex-col h-full overflow-hidden overflow-y-auto bg-[#0015810f] rounded-b-xl"
+      class="pt-14 pb-5 px-4 gap-1 flex flex-col h-full overflow-hidden overflow-y-auto bg-[#0015810f] rounded-b-xl"
     >
       <div
         class="absolute top-0 left-1/2 -translate-x-1/2 z-10"
@@ -628,10 +628,10 @@ function visibleLastStaffReadAvatar(staff_id: string) {
 
     // lặp qua toàn bộ các div
     LIST_AVATAR.forEach((element: any, i: number) => {
-      // reset ẩn toàn bộ các avatar hiện tại (dùng opacity để có transition)
-      if (i < LIST_AVATAR.length - 1) element.style.opacity = '0'
+      // reset ẩn toàn bộ các avatar hiện tại (dùng visibility để ẩn cả tooltip)
+      if (i < LIST_AVATAR.length - 1) element.style.visibility = 'hidden'
       // chỉ hiển thị avatar cuối cùng
-      else element.style.opacity = '1'
+      else element.style.visibility = 'visible'
     })
   }
 }

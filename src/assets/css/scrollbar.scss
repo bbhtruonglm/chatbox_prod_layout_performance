@@ -7,36 +7,69 @@ $thumb-size: 6px;
 
 // sửa lại thanh cuộn cho toàn bộ trang web
 * {
-    // đặt màu nền của track thành trong suốt
-    &::-webkit-scrollbar {
-        background: transparent;
-    }
+  // Scrollbar overlay - không chiếm layout space
+  scrollbar-width: thin;
+  scrollbar-color: $thumb-color transparent;
 
-    // đặt kích thước cho track
-    &::-webkit-scrollbar-track {
-        border-radius: $thumb-size;
-    }
+  // đặt màu nền của track thành trong suốt
+  &::-webkit-scrollbar {
+    background: transparent;
+  }
 
-    // đặt màu và kích thước cho thumb
-    &::-webkit-scrollbar-thumb {
-        background-color: $thumb-color;
-        border-radius: $thumb-size;
-    }
+  // đặt kích thước cho track
+  &::-webkit-scrollbar-track {
+    border-radius: $thumb-size;
+  }
 
-    // đặt màu cho thành scroll khi kéo
-    &::-webkit-scrollbar-thumb:active {
-        background-color: $thumb-color-active;
-    }
+  // đặt màu và kích thước cho thumb
+  &::-webkit-scrollbar-thumb {
+    background-color: $thumb-color;
+    border-radius: $thumb-size;
+  }
 
-    // Kiểu dáng riêng cho thanh cuộn ngang
-    // overflow-x: auto;
-    &::-webkit-scrollbar:horizontal {
-        height: $thumb-size;
-    }
+  // đặt màu cho thành scroll khi kéo
+  &::-webkit-scrollbar-thumb:active {
+    background-color: $thumb-color-active;
+  }
 
-    // Kiểu dáng riêng cho thanh cuộn dọc
-    // overflow-y: auto;
-    &::-webkit-scrollbar:vertical {
-        width: $thumb-size;
-    }
+  // Kiểu dáng riêng cho thanh cuộn ngang
+  // overflow-x: auto;
+  &::-webkit-scrollbar:horizontal {
+    height: $thumb-size;
+  }
+
+  // Kiểu dáng riêng cho thanh cuộn dọc
+  // overflow-y: auto;
+  &::-webkit-scrollbar:vertical {
+    width: $thumb-size;
+  }
+}
+
+// Class để áp dụng overlay scrollbar cho các element cụ thể
+.overlay-scrollbar {
+  // Sử dụng overflow: overlay (deprecated nhưng vẫn hoạt động trên WebKit)
+  overflow: auto;
+  overflow: overlay;
+
+  // Không để scrollbar chiếm không gian khi không cuộn
+  &::-webkit-scrollbar {
+    width: $thumb-size;
+    height: $thumb-size;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: $thumb-size;
+    transition: background-color 0.2s;
+  }
+
+  // Chỉ hiện scrollbar khi hover
+  &:hover::-webkit-scrollbar-thumb {
+    background-color: $thumb-color;
+  }
+
+  &::-webkit-scrollbar-thumb:active {
+    background-color: $thumb-color-active;
+  }
 }
