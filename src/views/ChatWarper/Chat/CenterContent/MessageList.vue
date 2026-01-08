@@ -34,7 +34,7 @@
         class="absolute top-0 left-1/2 -translate-x-1/2 z-10"
         v-if="is_loading && messageStore.list_message?.length"
       >
-        <LoadingSpinner size="md" />
+        <!-- <LoadingSpinner size="md" /> -->
       </div>
 
       <!-- <HeaderChat /> -->
