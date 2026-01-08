@@ -31,8 +31,8 @@
       class="pt-14 pb-5 pl-2 pr-5 gap-1 flex flex-col h-full overflow-hidden overflow-y-auto bg-[#0015810f] rounded-b-xl"
     >
       <div
+        class="absolute top-16 left-1/2 -translate-x-1/2 z-10"
         v-if="is_loading && messageStore.list_message?.length"
-        class="flex justify-center py-2 flex-shrink-0"
       >
         <LoadingSpinner size="md" />
       </div>
@@ -628,10 +628,10 @@ function visibleLastStaffReadAvatar(staff_id: string) {
 
     // lặp qua toàn bộ các div
     LIST_AVATAR.forEach((element: any, i: number) => {
-      // reset ẩn toàn bộ các avatar hiện tại
-      if (i < LIST_AVATAR.length - 1) element.style.display = 'none'
+      // reset ẩn toàn bộ các avatar hiện tại (dùng opacity để có transition)
+      if (i < LIST_AVATAR.length - 1) element.style.opacity = '0'
       // chỉ hiển thị avatar cuối cùng
-      else element.style.display = 'block'
+      else element.style.opacity = '1'
     })
   }
 }

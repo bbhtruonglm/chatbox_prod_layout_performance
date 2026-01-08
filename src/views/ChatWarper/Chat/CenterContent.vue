@@ -7,7 +7,7 @@
     class="h-full flex flex-col flex-grow min-w-0"
   >
     <!-- Test từng component -->
-    <!-- <UserInfo /> -->
+    <UserInfo />
     <MessageList />
     <InputChat :client_id="$route.query.user_id?.toString()" />
   </div>

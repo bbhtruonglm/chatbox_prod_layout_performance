@@ -4,7 +4,6 @@
     ref="staff_read_warper_ref"
     class="flex justify-end"
   >
-
     <template
       v-for="(staff_read_time, staff_id) of conversationStore
         .select_conversation?.staff_read"
@@ -15,7 +14,7 @@
         v-if="isStaffLastReadThisMessage(staff_id as string, staff_read_time)"
         :id="(staff_id as string)"
         :class="`message-staff-read-${staff_id}`"
-        class="w-4 h-4 staff-read-item rounded-full -ml-1 hidden mt-1 cursor-pointer relative hover:z-10 hover:border-2 hover:border-green-500"
+        class="w-4 h-4 staff-read-item rounded-full -ml-1 opacity-0 mt-1 cursor-pointer relative hover:z-10 hover:border-2 hover:border-green-500 transition-opacity duration-150"
       />
     </template>
   </div>
