@@ -139,6 +139,7 @@
         <StaffRead
           @change_last_read_message="visibleLastStaffReadAvatar"
           :time="message.time"
+          class="flex justify-end"
         />
       </div>
       <div
@@ -628,10 +629,10 @@ function visibleLastStaffReadAvatar(staff_id: string) {
 
     // lặp qua toàn bộ các div
     LIST_AVATAR.forEach((element: any, i: number) => {
-      // reset ẩn toàn bộ các avatar hiện tại (dùng visibility để ẩn cả tooltip)
-      if (i < LIST_AVATAR.length - 1) element.style.visibility = 'hidden'
+      // reset ẩn toàn bộ các avatar hiện tại (dùng display:none để không chiếm không gian)
+      if (i < LIST_AVATAR.length - 1) element.style.display = 'none'
       // chỉ hiển thị avatar cuối cùng
-      else element.style.visibility = 'visible'
+      else element.style.display = 'block'
     })
   }
 }
