@@ -1,42 +1,25 @@
 <template>
+  <!-- Spinner nhỏ gọn dùng cho load more -->
   <div
-    v-if="type === 'MINI'"
     class="loading-spinner"
     :class="sizeClass"
   >
     <div class="spinner"></div>
-  </div>
-
-  <div
-    v-else
-    class="absolute top-0 left-0 w-full h-full bg-slate-200 bg-opacity-50 flex items-center justify-center z-[9999]"
-  >
-    <div class="loading-spinner size-lg">
-      <div class="spinner"></div>
-    </div>
-    <p class="text-orange-500 ml-2">{{ text }}</p>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 
-const $props = withDefaults(
-  defineProps<{
-    /**
-     * MINI: chỉ có loading
-     * FULL: phủ toàn trang
-     */
-    type?: 'MINI' | 'FULL'
-    /** kích thước: 'sm' | 'md' | 'lg' */
-    size?: 'sm' | 'md' | 'lg'
-    text?: string
-  }>(),
-  {
-    type: 'MINI',
-    size: 'md',
-  }
-)
+/** Props cho component */
+interface IProps {
+  /** Kích thước: 'sm' | 'md' | 'lg' */
+  size?: 'sm' | 'md' | 'lg'
+}
+
+const $props = withDefaults(defineProps<IProps>(), {
+  size: 'sm',
+})
 
 /** Class kích thước dựa trên props */
 const sizeClass = computed(() => {
@@ -48,18 +31,9 @@ const sizeClass = computed(() => {
     case 'lg':
       return 'size-lg'
     default:
-      return 'size-md'
+      return 'size-sm'
   }
 })
-</script>
-
-<script lang="ts">
-import { i18n } from '@/lang'
-
-const $t = i18n.global.t
-
-/** đặt text mặc định cho prop */
-const text = $t('v1.common.loading')
 </script>
 
 <style scoped lang="scss">

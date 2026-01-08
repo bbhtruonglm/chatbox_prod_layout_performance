@@ -32,26 +32,11 @@
     >
       <div
         v-if="is_loading && messageStore.list_message?.length"
-        class="flex flex-col gap-4 pt-4 pb-2 pl-2 pr-5 transition-all"
+        class="flex justify-center py-2 flex-shrink-0"
       >
-        <div class="flex gap-2.5">
-          <div
-            class="w-8 h-8 rounded-full bg-slate-200 flex-shrink-0 animate-pulse"
-          ></div>
-          <div class="flex flex-col gap-1">
-            <div
-              class="w-[200px] h-10 bg-slate-100 rounded-lg animate-pulse"
-            ></div>
-          </div>
-        </div>
-        <div class="flex gap-2.5 flex-row-reverse">
-          <div class="flex flex-col gap-1 items-end">
-            <div
-              class="w-[240px] h-14 bg-blue-50 rounded-lg animate-pulse"
-            ></div>
-          </div>
-        </div>
+        <LoadingSpinner size="md" />
       </div>
+
       <!-- <HeaderChat /> -->
       <div
         v-for="(message, index) of show_list_message"
@@ -87,6 +72,7 @@
               class="w-8 h-8"
             />
           </div>
+
           <div
             :class="{
               'items-end':
@@ -122,7 +108,6 @@
                 :message_index="index"
               />
             </template>
-
             <PostTemplate
               v-else-if="
                 message.platform_type === 'FB_POST' && message.fb_post_id
@@ -198,6 +183,7 @@ import { debounce, findLastIndex, remove, size } from 'lodash'
 
 import FullPost from '@/views/ChatWarper/Chat/CenterContent/MessageList/FullPost.vue'
 import Loading from '@/components/Loading.vue'
+import LoadingSpinner from '@/components/LoadingSpinner.vue'
 import TimeSplit from '@/views/ChatWarper/Chat/CenterContent/MessageList/TimeSplit.vue'
 import UnsupportMessage from '@/views/ChatWarper/Chat/CenterContent/MessageList/UnsupportMessage.vue'
 import PageTempTextMessage from '@/views/ChatWarper/Chat/CenterContent/MessageList/PageTempTextMessage.vue'
@@ -286,6 +272,7 @@ const show_list_message = computed(() =>
       // Nếu là template thì phải có payload -> hiển thị
       return false
     })
+
     // Trả về true nếu có attachment hợp lệ
     return HAS_VALID_ATTACHMENT
   })

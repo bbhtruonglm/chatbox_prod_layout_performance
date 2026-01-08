@@ -284,8 +284,12 @@ watch(
 
     // Nếu token chưa khớp với page hiện tại -> Giữ loading chờ token mới
     if (token.new_page_id !== page_id) return
-    // Bật loading widget
-    is_loading_widget.value = true
+
+    /** danh sách widget đã cache của trang mới */
+    const CACHED_WIDGET = getPageWidget(page_id)
+
+    // chỉ bật loading khi chưa có dữ liệu widget cho trang này
+    if (!CACHED_WIDGET?.length) is_loading_widget.value = true
     try {
       // reset lại widget list
 

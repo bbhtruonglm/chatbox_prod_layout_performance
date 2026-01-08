@@ -1,109 +1,38 @@
 <template>
-  <img
-    @error="onImageError"
-    @load="removeAnimatePulse"
-    loading="lazy"
-    v-if="avatar"
-    :src="avatar"
-    :alt="conversation?.client_name || 'Avatar'"
-    class="overflow-hidden bg-slate-200 rounded-oval"
-  />
-  <div
-    v-else-if="comment"
-    :class="animate_pulse"
-    class="overflow-hidden bg-slate-200 rounded-oval"
-  >
-    <img
-      @error="onImageError"
-      @load="removeAnimatePulse"
-      loading="lazy"
-      :src="$main.loadCommentFromAvatar()"
-      :alt="comment?.from?.name || 'Avatar'"
-      class="w-full h-full"
-    />
-  </div>
   <PageAvatar
-    v-else-if="conversation?.conversation_type === 'POST'"
+    v-if="conversation?.conversation_type === 'POST'"
     :page_info="conversationStore.getPage()"
   />
+
+  <div
+    v-else-if="image_url"
+    class="overflow-hidden bg-slate-200 rounded-oval flex-shrink-0"
+  >
+    <img
+      @error="onImageError"
+      :src="image_url"
+      :alt="conversation?.client_name || 'Avatar'"
+      class="w-full h-full object-cover"
+    />
+  </div>
+
   <div
     v-else
-    :class="animate_pulse"
-    class="overflow-hidden bg-slate-200 rounded-oval"
+    class="overflow-hidden bg-slate-200 rounded-oval flex justify-center items-center font-semibold text-white flex-shrink-0"
+    :style="{ background: letterToColorCode() }"
   >
-    <div
-      :style="{ background: letterToColorCode() }"
-      class="w-full h-full flex justify-center items-center font-semibold text-white"
-      v-if="
-        conversation?.client_name && conversation?.platform_type === 'WEBSITE'
-      "
-    >
-      {{ nameToLetter(conversation?.client_name) }}
-    </div>
-    <img
-      @error="onImageError"
-      @load="removeAnimatePulse"
-      loading="lazy"
-      v-if="conversation?.platform_type === 'FB_MESS'"
-      :src="loadImageUrl()"
-      :alt="conversation?.client_name || 'Avatar'"
-      class="w-full h-full"
-    />
-    <img
-      @error="onImageError"
-      @load="removeAnimatePulse"
-      loading="lazy"
-      v-if="conversation?.platform_type === 'FB_INSTAGRAM'"
-      :src="loadImageUrl(conversation?.platform_type)"
-      :alt="conversation?.client_name || 'Avatar'"
-      class="w-full h-full"
-    />
-    <img
-      @error="onImageError"
-      @load="removeAnimatePulse"
-      loading="lazy"
-      v-if="conversation?.platform_type === 'TIKTOK'"
-      :src="loadImageUrl(conversation?.platform_type)"
-      :alt="conversation?.client_name || 'Avatar'"
-      class="w-full h-full"
-    />
-    <img
-      @error="onImageError"
-      @load="removeAnimatePulse"
-      loading="lazy"
-      v-if="
-        conversation?.platform_type === 'ZALO_OA' && conversation?.client_avatar
-      "
-      :src="conversation?.client_avatar"
-      :alt="conversation?.client_name || 'Avatar'"
-      class="w-full h-full"
-    />
-    <img
-      @error="onImageError"
-      @load="removeAnimatePulse"
-      loading="lazy"
-      v-if="
-        conversation?.platform_type === 'ZALO_PERSONAL' &&
-        conversation?.client_avatar
-      "
-      :src="conversation?.client_avatar"
-      :alt="conversation?.client_name || 'Avatar'"
-      class="w-full h-full"
-    />
-    <div
-      v-else
-      :style="{ background: letterToColorCode() }"
-      class="w-full h-full flex justify-center items-center font-semibold text-white"
-    >
-      {{ nameToLetter(conversation?.client_name || '') }}
-    </div>
+    {{ nameToLetter(conversation?.client_name || '') }}
   </div>
 </template>
+<script lang="ts">
+/** Cache danh sách các url ảnh đã load thành công để tránh nháy skeleton */
+const loaded_images = new Set<string>()
+</script>
 <script setup lang="ts">
 import { nameToLetter } from '@/service/helper/format'
 import { useConversationStore } from '@/stores'
 import { Cdn, SingletonCdn, type ICdn } from '@/utils/helper/Cdn'
-import { onMounted, ref } from 'vue'
+import { computed } from 'vue'
 
 import PageAvatar from '@/components/Avatar/PageAvatar.vue'
 
@@ -134,21 +63,26 @@ const $props = withDefaults(
 
 const conversationStore = useConversationStore()
 
-/**thêm hiệu ứng ẩn hiện khi ảnh đang được load */
-const animate_pulse = ref('animate-pulse')
+const image_url = computed(() => {
+  // 1. Ưu tiên avatar truyền vào trực tiếp
+  if ($props.avatar) return $props.avatar
 
-onMounted(() => {
-  /** tắt hiệu ứng với dạng web */
-  if ($props.conversation?.platform_type === 'WEBSITE') removeAnimatePulse()
-  /** tắt hiệu ứng với các nền tảng không có avatar */
-  if (
-    NO_AVT_PLATFORMS.some(p =>
-      $props.conversation?.platform_type?.includes(p)
-    ) &&
-    !$props.conversation?.client_avatar
-  ) {
-    removeAnimatePulse()
-  }
+  // 2. Avatar từ comment
+  if ($props.comment) return $main.loadCommentFromAvatar()
+
+  // 3. Avatar từ conversation
+  const conv = $props.conversation
+  if (!conv) return ''
+
+  // Các nền tảng dùng CDN
+  if (conv.platform_type === 'FB_MESS') return loadImageUrl()
+  if (conv.platform_type === 'FB_INSTAGRAM') return loadImageUrl('FB_INSTAGRAM')
+  if (conv.platform_type === 'TIKTOK') return loadImageUrl('TIKTOK')
+
+  // Zalo hoặc các nền tảng khác có sẵn avatar
+  if (conv.client_avatar) return conv.client_avatar
+
+  return ''
 })
 
 /**tạo bg dựa trên chữ cái */
@@ -170,10 +104,6 @@ function letterToColorCode() {
   var blue = (charCode * 10) % 256
 
   return 'rgb(' + red + ', ' + green + ', ' + blue + ')'
-}
-/**tắt hiệu ứng ẩn hiện khi ảnh load thành công */
-function removeAnimatePulse() {
-  animate_pulse.value = ''
 }
 /**tạo url ảnh */
 function loadImageUrl(platform_type?: PageType) {
