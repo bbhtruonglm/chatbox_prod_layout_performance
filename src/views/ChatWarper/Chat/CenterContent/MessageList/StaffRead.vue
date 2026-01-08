@@ -14,9 +14,20 @@
         v-if="isStaffLastReadThisMessage(staff_id as string, staff_read_time)"
         :id="(staff_id as string)"
         :class="`message-staff-read-${staff_id}`"
-        class="size-4 staff-read-item rounded-full -ml-1 mt-0.5 hidden cursor-pointer absolute hover:z-10 hover:border-2 hover:border-green-500"
+        class="size-4 staff-read-item rounded-full -ml-1 -mt-0.5 hidden cursor-pointer absolute hover:z-10 hover:border-2 hover:border-green-500"
       />
     </template>
+
+    <!-- [TEST] 10 mock items để test UI -->
+    <!-- <StaffAvatar
+      v-for="index in 10"
+      :key="`mock-staff-${index}`"
+      v-tooltip="`Staff ${index} đã đọc`"
+      @click="toggleModal"
+      :id="`mock-staff-${index}`"
+      :class="`message-staff-read-mock-${index}`"
+      class="size-4 staff-read-item rounded-full -ml-1 -mt-0.5 block cursor-pointer relative hover:z-10 hover:border-2 hover:border-green-500"
+    /> -->
   </div>
 </template>
 <script setup lang="ts">
