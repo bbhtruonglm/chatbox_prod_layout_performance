@@ -3,8 +3,12 @@
     v-if="type === 'MINI'"
     class="loading-spinner"
     :class="sizeClass"
+    :style="customSizeStyle"
   >
-    <div class="spinner"></div>
+    <div
+      class="spinner"
+      :style="customSpinnerStyle"
+    ></div>
   </div>
 
   <div
@@ -28,8 +32,8 @@ const $props = withDefaults(
      * FULL: phủ toàn trang
      */
     type?: 'MINI' | 'FULL'
-    /** kích thước: 'sm' | 'md' | 'lg' */
-    size?: 'sm' | 'md' | 'lg'
+    /** kích thước: 'sm' | 'md' | 'lg' hoặc số (px) */
+    size?: 'sm' | 'md' | 'lg' | number
     text?: string
   }>(),
   {
@@ -40,6 +44,9 @@ const $props = withDefaults(
 
 /** Class kích thước dựa trên props */
 const sizeClass = computed(() => {
+  // Nếu là số thì trả về rỗng (sẽ dùng inline style)
+  if (typeof $props.size === 'number') return ''
+
   switch ($props.size) {
     case 'sm':
       return 'size-sm'
@@ -49,6 +56,25 @@ const sizeClass = computed(() => {
       return 'size-lg'
     default:
       return 'size-md'
+  }
+})
+
+/** Inline style cho container khi size là number */
+const customSizeStyle = computed(() => {
+  if (typeof $props.size !== 'number') return {}
+  return {}
+})
+
+/** Inline style cho spinner khi size là number */
+const customSpinnerStyle = computed(() => {
+  if (typeof $props.size !== 'number') return {}
+  const size = $props.size
+  const borderWidth = Math.max(2, Math.round(size / 8))
+  return {
+    width: `${size}px`,
+    height: `${size}px`,
+    '-webkit-mask': `radial-gradient(farthest-side, transparent calc(100% - ${borderWidth}px), #000 calc(100% - ${borderWidth}px))`,
+    mask: `radial-gradient(farthest-side, transparent calc(100% - ${borderWidth}px), #000 calc(100% - ${borderWidth}px))`,
   }
 })
 </script>
