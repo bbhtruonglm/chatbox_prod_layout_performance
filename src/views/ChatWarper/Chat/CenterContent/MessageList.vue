@@ -281,10 +281,13 @@ const show_list_message = computed(() => {
   return [...FILTERED_MESSAGES].reverse()
 })
 
-/**vị trí của tin nhắn cuối cùng nhân viên gửi */
+/**
+ * vị trí của tin nhắn cuối cùng nhân viên gửi
+ * Với column-reverse: mảng đã reverse nên tin mới nhất ở đầu
+ * Dùng findIndex để tìm tin PAGE đầu tiên (= tin mới nhất)
+ */
 const last_client_message_index = computed(() =>
-  findLastIndex(
-    show_list_message.value,
+  show_list_message.value.findIndex(
     m => m.message_type === 'page' && !!m.message_metadata
   )
 )
