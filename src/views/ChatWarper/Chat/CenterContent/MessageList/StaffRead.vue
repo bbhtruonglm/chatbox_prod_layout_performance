@@ -32,8 +32,12 @@
 </template>
 <script setup lang="ts">
 import { useConversationStore, useMessageStore } from '@/stores'
-import { computed, ref } from 'vue'
-import { getStaffName, getStaffReadDate } from '@/service/function'
+import { computed, ref, nextTick } from 'vue'
+import {
+  getStaffName,
+  getStaffReadDate,
+  getPageStaff,
+} from '@/service/function'
 
 import StaffAvatar from '@/components/Avatar/StaffAvatar.vue'
 
@@ -75,10 +79,13 @@ const total_staff_count = computed(() => {
 
   return Object.keys(staff_read).filter(staff_id => {
     const staff_read_time = staff_read[staff_id]
-    const staff_name = getStaffName(
-      conversationStore.select_conversation?.fb_page_id,
-      staff_id
+
+    // Use getPageStaff directly to avoid useI18n outside setup context issue
+    const staff_list = getPageStaff(
+      conversationStore.select_conversation?.fb_page_id
     )
+    const staff_name = staff_list?.[staff_id]?.name
+
     if (!staff_read_time || !staff_name) return false
 
     // Đã đọc tin này (>= time)
@@ -100,31 +107,38 @@ const remaining_staff_count = computed(() => {
 const staff_read_warper_ref = ref<ComponentRef>()
 
 /** Ẩn hiện modal - lấy TẤT CẢ staff đã đọc tin nhắn này */
-function toggleModal() {
+async function toggleModal() {
   if (!$props.time) return
+
+  console.log('Toggle Modal triggered', $props.time, $props.newer_time)
 
   const CURRENT_MESSAGE_DATE = new Date($props.time).getTime()
   const staff_read = conversationStore.select_conversation?.staff_read || {}
 
   // Lấy tất cả staff_id đã đọc tin nhắn này (không giới hạn 5)
-  messageStore.select_staff_read_id = Object.keys(staff_read).filter(
-    staff_id => {
-      const staff_read_time = staff_read[staff_id]
-      const staff_name = getStaffName(
-        conversationStore.select_conversation?.fb_page_id,
-        staff_id
-      )
-      if (!staff_read_time || !staff_name) return false
+  const selected = Object.keys(staff_read).filter(staff_id => {
+    const staff_read_time = staff_read[staff_id]
 
-      const is_read_this = staff_read_time >= CURRENT_MESSAGE_DATE
-      // function scope, tính lại
-      const NEWER = $props.newer_time
-        ? new Date($props.newer_time).getTime()
-        : Infinity
+    // Use getPageStaff directly
+    const staff_list = getPageStaff(
+      conversationStore.select_conversation?.fb_page_id
+    )
+    const staff_name = staff_list?.[staff_id]?.name
 
-      return is_read_this && staff_read_time < NEWER
-    }
-  )
+    if (!staff_read_time || !staff_name) return false
+
+    const is_read_this = staff_read_time >= CURRENT_MESSAGE_DATE
+    // function scope, tính lại
+    const NEWER = $props.newer_time
+      ? new Date($props.newer_time).getTime()
+      : Infinity
+
+    return is_read_this && staff_read_time < NEWER
+  })
+  messageStore.select_staff_read_id = []
+  await nextTick()
+  messageStore.select_staff_read_id = selected
+  console.log('Selected staff IDs:', selected)
 }
 /**kiểm tra xem nhân viên có đọc đến tin nhắn này hay không */
 function isStaffLastReadThisMessage(

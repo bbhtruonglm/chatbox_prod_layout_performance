@@ -160,7 +160,7 @@
           />
 
           <!-- CASE 2: Tin nhắn Page (Bên phải) -> MessageDate và StaffRead nằm bên phải -->
-          <div class="flex justify-end absolute right-0 top-0 w-full">
+          <div class="flex justify-end absolute right-0 top-0 w-full h-4">
             <div class="relative flex items-center">
               <!-- MessageDate cho Page - nằm cạnh StaffRead (absolute left) -->
               <MessageDate

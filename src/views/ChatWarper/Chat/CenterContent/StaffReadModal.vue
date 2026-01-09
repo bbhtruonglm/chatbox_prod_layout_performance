@@ -42,7 +42,7 @@
               <div class="text-sm">
                 <div class="font-semibold">
                   {{
-                    getStaffName(
+                    getStaffNameLocal(
                       conversationStore.select_conversation?.fb_page_id,
                       staff_id
                     )
@@ -66,7 +66,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useConversationStore, useMessageStore } from '@/stores'
-import { getStaffReadDate, getStaffName } from '@/service/function'
+import { getStaffReadDate, getPageStaff } from '@/service/function'
 import { useI18n } from 'vue-i18n'
 
 import CloseIcon from '@/components/Icons/Close.vue'
@@ -81,12 +81,21 @@ const is_open = ref(false)
 
 watch(
   () => messageStore.select_staff_read_id,
-  () => toggleModal()
+  val => {
+    if (val?.length) is_open.value = true
+  }
 )
 
 /**ẩn hiện modal */
 function toggleModal() {
   // toggle modal
   is_open.value = !is_open.value
+}
+
+const getStaffNameLocal = (page_id?: string, staff_id?: string) => {
+  return (
+    getPageStaff(page_id)?.[staff_id as string]?.name ||
+    `[${$t('v1.view.main.dashboard.chat.center_content.del_staff')}]`
+  )
 }
 </script>
