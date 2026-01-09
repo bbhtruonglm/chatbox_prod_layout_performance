@@ -66,41 +66,51 @@ const MAX_VISIBLE_AVATARS = 5
  * Sử dụng cùng logic với isStaffLastReadThisMessage
  */
 const total_staff_count = computed(() => {
+  // nếu không có thời gian tin nhắn thì trả về 0
   if (!$props.time) return 0
 
+  /** thời gian tin nhắn hiện tại */
   const CURRENT_MESSAGE_DATE = new Date($props.time).getTime()
-  const staff_read = conversationStore.select_conversation?.staff_read || {}
+  /** danh sách staff đã đọc từ store */
+  const STAFF_READ = conversationStore.select_conversation?.staff_read || {}
 
   // Đếm số staff đã đọc tin nhắn này (trong khoảng time của tin này)
   // Logic: staff_read_time >= current && staff_read_time < newer_time
+  /** thời gian của tin nhắn mới hơn */
   const NEWER_MESSAGE_DATE = $props.newer_time
     ? new Date($props.newer_time).getTime()
     : Infinity
 
-  return Object.keys(staff_read).filter(staff_id => {
-    const staff_read_time = staff_read[staff_id]
+  return Object.keys(STAFF_READ).filter(staff_id => {
+    /** thời gian đọc của nhân viên */
+    const STAFF_READ_TIME = STAFF_READ[staff_id]
 
-    // Use getPageStaff directly to avoid useI18n outside setup context issue
-    const staff_list = getPageStaff(
+    // Sử dụng trực tiếp getPageStaff để tránh lỗi useI18n ngoài setup context
+    /** danh sách thông tin nhân viên */
+    const STAFF_LIST = getPageStaff(
       conversationStore.select_conversation?.fb_page_id
     )
-    const staff_name = staff_list?.[staff_id]?.name
+    /** tên nhân viên */
+    const STAFF_NAME = STAFF_LIST?.[staff_id]?.name
 
-    if (!staff_read_time || !staff_name) return false
+    if (!STAFF_READ_TIME || !STAFF_NAME) return false
 
     // Đã đọc tin này (>= time)
-    const is_read_this = staff_read_time >= CURRENT_MESSAGE_DATE
+    /** cờ đánh dấu đã đọc tin này */
+    const IS_READ_THIS = STAFF_READ_TIME >= CURRENT_MESSAGE_DATE
     // Chưa đọc tin mới hơn (< newer_time)
-    const is_not_read_newer = staff_read_time < NEWER_MESSAGE_DATE
+    /** cờ đánh dấu chưa đọc tin mới hơn */
+    const IS_NOT_READ_NEWER = STAFF_READ_TIME < NEWER_MESSAGE_DATE
 
-    return is_read_this && is_not_read_newer
+    return IS_READ_THIS && IS_NOT_READ_NEWER
   }).length
 })
 
 /** Số nhân viên còn lại không hiển thị avatar */
 const remaining_staff_count = computed(() => {
-  const remaining = total_staff_count.value - MAX_VISIBLE_AVATARS
-  return remaining > 0 ? remaining : 0
+  /** số lượng còn lại */
+  const REMAINING = total_staff_count.value - MAX_VISIBLE_AVATARS
+  return REMAINING > 0 ? REMAINING : 0
 })
 
 /**ref của div chứa staff read */
@@ -110,35 +120,35 @@ const staff_read_warper_ref = ref<ComponentRef>()
 async function toggleModal() {
   if (!$props.time) return
 
-  console.log('Toggle Modal triggered', $props.time, $props.newer_time)
-
+  /** thời gian tin nhắn hiện tại */
   const CURRENT_MESSAGE_DATE = new Date($props.time).getTime()
-  const staff_read = conversationStore.select_conversation?.staff_read || {}
+  /** danh sách staff đã đọc từ store */
+  const STAFF_READ = conversationStore.select_conversation?.staff_read || {}
 
   // Lấy tất cả staff_id đã đọc tin nhắn này (không giới hạn 5)
-  const selected = Object.keys(staff_read).filter(staff_id => {
-    const staff_read_time = staff_read[staff_id]
+  /** danh sách id nhân viên đã đọc tin nhắn này */
+  const SELECTED = Object.keys(STAFF_READ).filter(staff_id => {
+    /** thời gian đọc của nhân viên */
+    const STAFF_READ_TIME = STAFF_READ[staff_id]
+    // Nếu không có thời gian đọc thì trả về false
+    if (!STAFF_READ_TIME) return false
 
-    // Use getPageStaff directly
-    const staff_list = getPageStaff(
-      conversationStore.select_conversation?.fb_page_id
-    )
-    const staff_name = staff_list?.[staff_id]?.name
-
-    if (!staff_read_time || !staff_name) return false
-
-    const is_read_this = staff_read_time >= CURRENT_MESSAGE_DATE
+    /** cờ đánh dấu đã đọc tin này */
+    const IS_READ_THIS = STAFF_READ_TIME >= CURRENT_MESSAGE_DATE
     // function scope, tính lại
+    /** thời gian của tin nhắn mới hơn */
     const NEWER = $props.newer_time
       ? new Date($props.newer_time).getTime()
       : Infinity
-
-    return is_read_this && staff_read_time < NEWER
+    // Nếu chưa đọc tin nhắn mới hơn thì trả về false
+    return IS_READ_THIS && STAFF_READ_TIME < NEWER
   })
+  // reset trước
   messageStore.select_staff_read_id = []
+  // đợi render xong
   await nextTick()
-  messageStore.select_staff_read_id = selected
-  console.log('Selected staff IDs:', selected)
+  // set lại
+  messageStore.select_staff_read_id = SELECTED
 }
 /**kiểm tra xem nhân viên có đọc đến tin nhắn này hay không */
 function isStaffLastReadThisMessage(

@@ -2,7 +2,7 @@
   <ClientAvatar
     v-if="isClientLastReadThisMessage()"
     :conversation="conversationStore.select_conversation"
-    class="message-client-read absolute -right-4 bottom-5 opacity-0 w-3 h-3 text-green-600 hover:z-10 hover:border-2 hover:border-green-500 rounded-full cursor-pointer transition-opacity duration-200"
+    class="message-client-read absolute -right-3.5 bottom-5 opacity-0 w-3 h-3 text-green-600 hover:z-10 hover:border-2 hover:border-green-500 rounded-full cursor-pointer transition-opacity duration-200"
     v-tooltip="
       `${conversationStore.select_conversation?.client_name} ${$t(
         'v1.view.main.dashboard.chat.center_content.staff_read'

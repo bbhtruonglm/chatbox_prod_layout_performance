@@ -1,7 +1,7 @@
 <template>
   <div
     id="chat__post-template"
-    class="flex flex-col gap-1"
+    class="flex flex-col gap-1 py-2"
   >
     <div
       v-if="message?.ad_id"

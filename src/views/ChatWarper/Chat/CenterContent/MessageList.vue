@@ -92,7 +92,7 @@
             />
             <div
               v-else-if="message.message_type === 'system'"
-              class="text-center px-20"
+              class="text-center px-20 py-1"
             >
               <SystemMessage
                 v-if="message.message_text"
@@ -167,7 +167,7 @@
                 v-if="
                   !['client', 'customer', 'system'].includes(
                     message.message_type
-                  )
+                  ) && message.platform_type !== 'FB_POST'
                 "
                 :class="[
                   'absolute right-full z-10 -top-3 hidden group-hover:block whitespace-nowrap',
@@ -440,37 +440,47 @@ const getCheckSlowReply = (
   return new CheckSlowReply(message, show_list_message.value?.[index + 1])
 }
 
-// Helper lấy time của message mới hơn liền kề
+/** Helper lấy time của message mới hơn liền kề */
 const getNewerMessageTime = (index: number) => {
-  const list = show_list_message.value
-  const current = list[index]
-  if (!current) return undefined
+  /** danh sách tin nhắn hiện tại */
+  const LIST = show_list_message.value
+  /** tin nhắn hiện tại */
+  const CURRENT = LIST[index]
+  // nếu không có tin nhắn thì trả về undefined
+  if (!CURRENT) return undefined
 
-  const t = (msg: any) => new Date(msg?.time || msg?.createdAt || 0).getTime()
-  const current_time = t(current)
+  // Tìm tin nhắn PAGE/NOTE gần nhất phía trên (index nhỏ hơn - vì list đã reverse tin mới ở trên)
+  // Vì các tin nhắn client/system không có StaffRead avatar, nên ta phải tìm mốc thời gian của tin nhắn CÓ hiển thị avatar
+  // để làm cận trên (newer_time) cho logic hiển thị
+  for (let i = index - 1; i >= 0; i--) {
+    /** tin nhắn tiếp theo trong vòng lặp */
+    const NEXT = LIST[i]
 
-  // Check index - 1
-  const prev = list[index - 1]
-  if (prev && t(prev) > current_time) return prev.time || prev.createdAt
+    // Skip các loại tin nhắn không có StaffRead avatar
+    if (['client', 'customer', 'system'].includes(NEXT.message_type)) continue
 
-  // Check index + 1
-  const next = list[index + 1]
-  if (next && t(next) > current_time) return next.time || next.createdAt
+    // Trả về time của tin nhắn hợp lệ tìm thấy
+    return NEXT.time || NEXT.createdAt
+  }
 
   return undefined
 }
 
-// Helper kiểm tra xem có staff nào đọc tại message này không (logic tương đương StaffRead.vue)
+/** Helper kiểm tra xem có staff nào đọc tại message này không (logic tương đương StaffRead.vue) */
 const hasStaffReadAtMessage = (
   message: MessageInfo,
   newer_message?: MessageInfo | string | number
 ) => {
-  const store_staff_read =
+  /** danh sách staff đã đọc từ store */
+  const STORE_STAFF_READ =
     conversationStore.select_conversation?.staff_read || {}
-  const msg_time = new Date(message.time || message.createdAt).getTime()
+  /** thời gian tin nhắn hiện tại */
+  const MSG_TIME = new Date(message.time || message.createdAt).getTime()
 
   // Handle newer_message as object or time string/number
+  /** thời gian của tin nhắn mới hơn */
   let newer_time = Infinity
+  // có tin nhắn mới hơn thì xử lý
   if (newer_message) {
     newer_time =
       typeof newer_message === 'object'
@@ -480,19 +490,22 @@ const hasStaffReadAtMessage = (
         : new Date(newer_message).getTime()
   }
 
-  return Object.keys(store_staff_read).some(staff_id => {
-    const read_time = store_staff_read[staff_id]
-    if (!read_time) return false
+  return Object.keys(STORE_STAFF_READ).some(staff_id => {
+    /** thời gian đọc của staff */
+    const READ_TIME = STORE_STAFF_READ[staff_id]
+    // Nếu không có thời gian đọc thì trả về false
+    if (!READ_TIME) return false
 
     // Check valid staff
-    const staff_name = getStaffName(
+    /** tên nhân viên */
+    const STAFF_NAME = getStaffName(
       conversationStore.select_conversation?.fb_page_id,
       staff_id
     )
-    if (!staff_name) return false
+    if (!STAFF_NAME) return false
 
     // Logic: read_time >= msg_time && read_time < newer_time
-    return read_time >= msg_time && read_time < newer_time
+    return READ_TIME >= MSG_TIME && READ_TIME < newer_time
   })
 }
 
@@ -622,12 +635,10 @@ function handleButtonToBottom($event: UIEvent) {
    */
   // với column-reverse: scrollTop < -100 nghĩa là đang scroll lên xem tin cũ → hiện nút
   if (SCROLL_TOP < -100 && !messageStore.is_show_to_bottom) {
-    console.log('[DEBUG] Hiện nút scroll to bottom')
     messageStore.is_show_to_bottom = true
   }
   // scrollTop >= -100 (gần 0) nghĩa là gần bottom (tin mới) → ẩn nút
   if (SCROLL_TOP >= -100 && messageStore.is_show_to_bottom) {
-    console.log('[DEBUG] Ẩn nút scroll to bottom')
     messageStore.is_show_to_bottom = false
   }
 }
