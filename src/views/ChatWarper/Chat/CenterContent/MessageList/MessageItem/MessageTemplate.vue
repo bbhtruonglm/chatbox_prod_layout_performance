@@ -1,9 +1,9 @@
 <template>
-  <div class="flex items-end gap-1 group/template rounded-lg">
+  <div class="flex items-end gap-0.5 group/template rounded-lg relative">
     <div
       id="chat__message-template"
       :class="is_fix_size ? 'w-[300px]' : 'max-w-[300px]'"
-      class="rounded-lg p-2 gap-1 flex flex-col flex-shrink-0 relative"
+      class="rounded-lg p-2 pb-3 gap-1 flex flex-col flex-shrink-0 relative min-w-16"
       @dblclick="copyMessage(message.message_text || '')"
     >
       <div
@@ -98,7 +98,7 @@
 
     <!-- Moved Footer (Outside Bubble) -->
     <div
-      class="flex flex-col justify-end text-[10px] text-slate-400 select-none pb-1 px-2"
+      class="absolute -bottom-1 right-0 flex flex-col justify-end text-[10px] text-slate-400 select-none pb-0.5 px-2"
     >
       <div class="flex items-center gap-1">
         <span>
