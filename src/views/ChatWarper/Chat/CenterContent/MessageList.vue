@@ -28,7 +28,7 @@
       v-else
       @scroll="onScrollMessage"
       :id="messageStore.list_message_id"
-      class="pt-14 pb-5 px-4 gap-1 flex flex-col-reverse h-full overflow-hidden overflow-y-auto bg-[#0015810f] rounded-b-xl"
+      class="pt-14 pb-5 px-4 gap-2 flex flex-col-reverse h-full overflow-hidden overflow-y-auto bg-[#0015810f] rounded-b-xl"
       style="overflow-anchor: auto"
     >
       <!-- Anchor element để giữ scroll position khi load more -->
@@ -171,7 +171,7 @@
                 "
                 :class="[
                   'absolute right-full z-10 -top-3 hidden group-hover:block whitespace-nowrap',
-                  hasStaffReadAtMessage(message, show_list_message?.[index - 1])
+                  hasStaffReadAtMessage(message, getNewerMessageTime(index))
                     ? 'mr-1'
                     : 'mr-8',
                 ]"
@@ -195,7 +195,7 @@
               <StaffRead
                 @change_last_read_message="visibleLastStaffReadAvatar"
                 :time="message.time"
-                :newer_time="show_list_message?.[index - 1]?.time"
+                :newer_time="getNewerMessageTime(index)"
               />
             </div>
           </div>
@@ -440,17 +440,45 @@ const getCheckSlowReply = (
   return new CheckSlowReply(message, show_list_message.value?.[index + 1])
 }
 
+// Helper lấy time của message mới hơn liền kề
+const getNewerMessageTime = (index: number) => {
+  const list = show_list_message.value
+  const current = list[index]
+  if (!current) return undefined
+
+  const t = (msg: any) => new Date(msg?.time || msg?.createdAt || 0).getTime()
+  const current_time = t(current)
+
+  // Check index - 1
+  const prev = list[index - 1]
+  if (prev && t(prev) > current_time) return prev.time || prev.createdAt
+
+  // Check index + 1
+  const next = list[index + 1]
+  if (next && t(next) > current_time) return next.time || next.createdAt
+
+  return undefined
+}
+
 // Helper kiểm tra xem có staff nào đọc tại message này không (logic tương đương StaffRead.vue)
 const hasStaffReadAtMessage = (
   message: MessageInfo,
-  newer_message?: MessageInfo
+  newer_message?: MessageInfo | string | number
 ) => {
   const store_staff_read =
     conversationStore.select_conversation?.staff_read || {}
   const msg_time = new Date(message.time || message.createdAt).getTime()
-  const newer_time = newer_message
-    ? new Date(newer_message.time || newer_message.createdAt).getTime()
-    : Infinity
+
+  // Handle newer_message as object or time string/number
+  let newer_time = Infinity
+  if (newer_message) {
+    newer_time =
+      typeof newer_message === 'object'
+        ? new Date(
+            (newer_message as any).time || (newer_message as any).createdAt
+          ).getTime()
+        : new Date(newer_message).getTime()
+  }
 
   return Object.keys(store_staff_read).some(staff_id => {
     const read_time = store_staff_read[staff_id]

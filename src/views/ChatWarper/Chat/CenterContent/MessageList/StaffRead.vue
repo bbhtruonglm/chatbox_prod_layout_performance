@@ -16,7 +16,7 @@
         v-if="isStaffLastReadThisMessage(staff_id as string, staff_read_time)"
         :id="(staff_id as string)"
         :class="`message-staff-read-${staff_id}`"
-        class="size-4 staff-read-item rounded-full -ml-1 opacity-0 cursor-pointer -mt-1.5 relative hover:z-10 hover:border-2 hover:border-green-500 transition-opacity duration-200 hidden"
+        class="size-4 staff-read-item rounded-full -ml-1 opacity-0 cursor-pointer -mt-[8px] relative hover:z-10 hover:border-2 hover:border-green-500 transition-opacity duration-200 hidden"
       />
     </template>
     <!-- Badge hiển thị số nhân viên còn lại nếu > 5 -->
