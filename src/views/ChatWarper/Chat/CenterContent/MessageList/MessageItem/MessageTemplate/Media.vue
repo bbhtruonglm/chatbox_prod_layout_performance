@@ -1,7 +1,7 @@
 <template>
   <div
     @click="openMediaDetail"
-    class="gap-2.5 flex flex-col cursor-pointer hover:brightness-90 rounded-lg overflow-hidden"
+    class="gap-2.5 flex flex-col cursor-pointer hover:brightness-90 rounded-lg overflow-hidden pb-1"
   >
     <div
       v-if="data_source?.image?.url"

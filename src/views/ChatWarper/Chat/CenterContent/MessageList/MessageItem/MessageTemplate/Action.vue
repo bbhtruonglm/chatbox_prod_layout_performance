@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-1 flex-shrink-0">
+  <div class="flex flex-col gap-1 flex-shrink-0 pb-1">
     <template v-for="button of list_button">
       <button
         v-if="button.type"
