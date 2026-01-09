@@ -41,7 +41,7 @@
       <div
         v-for="(message, index) of show_list_message"
         :key="message._id"
-        class="relative"
+        class="relative group"
       >
         <div class="flex flex-col gap-2">
           <UnReadAlert :index />
@@ -136,11 +136,70 @@
             :time="message.time"
           />
         </div>
-        <StaffRead
-          @change_last_read_message="visibleLastStaffReadAvatar"
-          :time="message.time"
-          class="flex justify-end"
-        />
+        <!-- Container hiển thị thông tin phụ: Date và StaffRead -->
+        <div class="relative h-0">
+          <!-- CASE 1: Tin nhắn Client (Bên trái) -> MessageDate nằm bên trái -->
+          <MessageDate
+            v-if="['client', 'customer'].includes(message.message_type)"
+            class="absolute left-10 z-10 -top-3 hidden group-hover:block whitespace-nowrap"
+            :time="message.time || message.createdAt"
+            :meta="message.message_metadata"
+            :fb_page_id="message.fb_page_id"
+            :sender_id="message.sender_id"
+            :message_type="message.message_type"
+            :group_client_name="message.group_client_name"
+            :is_ai="messageStore.isAiMessage(message)"
+            :is_edit="message?.is_edit"
+            :duration="getCheckSlowReply(message, index).getDuration()"
+            :is_show_duration="
+              getCheckSlowReply(message, index).isShowDuration() &&
+              !getCheckSlowReply(message, index).isSlowReply() &&
+              !getCheckSlowReply(message, index).isSystemSlowReply()
+            "
+            :platform_type="message.platform_type"
+          />
+
+          <!-- CASE 2: Tin nhắn Page (Bên phải) -> MessageDate và StaffRead nằm bên phải -->
+          <div class="flex justify-end absolute right-0 top-0 w-full">
+            <div class="relative flex items-center">
+              <!-- MessageDate cho Page - nằm cạnh StaffRead (absolute left) -->
+              <MessageDate
+                v-if="
+                  !['client', 'customer', 'system'].includes(
+                    message.message_type
+                  )
+                "
+                :class="[
+                  'absolute right-full z-10 -top-3 hidden group-hover:block whitespace-nowrap',
+                  hasStaffReadAtMessage(message, show_list_message?.[index - 1])
+                    ? 'mr-1'
+                    : 'mr-8',
+                ]"
+                :time="message.time || message.createdAt"
+                :meta="message.message_metadata"
+                :fb_page_id="message.fb_page_id"
+                :sender_id="message.sender_id"
+                :message_type="message.message_type"
+                :group_client_name="message.group_client_name"
+                :is_ai="messageStore.isAiMessage(message)"
+                :is_edit="message?.is_edit"
+                :duration="getCheckSlowReply(message, index).getDuration()"
+                :is_show_duration="
+                  getCheckSlowReply(message, index).isShowDuration() &&
+                  !getCheckSlowReply(message, index).isSlowReply() &&
+                  !getCheckSlowReply(message, index).isSystemSlowReply()
+                "
+                :platform_type="message.platform_type"
+              />
+
+              <StaffRead
+                @change_last_read_message="visibleLastStaffReadAvatar"
+                :time="message.time"
+                :newer_time="show_list_message?.[index - 1]?.time"
+              />
+            </div>
+          </div>
+        </div>
       </div>
       <!-- [SEND_MESSAGE_LIST] Hiển thị tin nhắn đang gửi - đặt trước vì column-reverse -->
       <div
@@ -177,8 +236,12 @@ import {
 import { flow } from '@/service/helper/async'
 import { read_message } from '@/service/api/chatbox/n4-service'
 import { toastError } from '@/service/helper/alert'
-import { getPageInfo } from '@/service/function'
+import { getPageInfo, getStaffName } from '@/service/function'
 import { debounce, findLastIndex, remove, size } from 'lodash'
+import {
+  CheckSlowReply,
+  type ICheckSlowReply,
+} from '@/views/ChatWarper/Chat/CenterContent/MessageList/MessageItem/CheckSlowReply'
 
 import FullPost from '@/views/ChatWarper/Chat/CenterContent/MessageList/FullPost.vue'
 import Loading from '@/components/Loading.vue'
@@ -190,6 +253,7 @@ import SendStatus from '@/views/ChatWarper/Chat/CenterContent/MessageList/SendSt
 import SystemMessage from '@/views/ChatWarper/Chat/CenterContent/MessageList/SystemMessage.vue'
 import ClientRead from '@/views/ChatWarper/Chat/CenterContent/MessageList/ClientRead.vue'
 import StaffRead from '@/views/ChatWarper/Chat/CenterContent/MessageList/StaffRead.vue'
+import MessageDate from '@/views/ChatWarper/Chat/CenterContent/MessageList/MessageDate.vue'
 import AdMessage from '@/views/ChatWarper/Chat/CenterContent/MessageList/AdMessage.vue'
 import PostTemplate from '@/views/ChatWarper/Chat/CenterContent/MessageList/PostTemplate.vue'
 import FacebookPost from '@/views/ChatWarper/Chat/CenterContent/MessageList/FacebookPost.vue'
@@ -368,6 +432,43 @@ function isLockPage(): boolean {
   // tổ chức free + page chưa bị lock -> ok
   return false
 }
+// Helper để lấy CheckSlowReply cho MessageDate
+const getCheckSlowReply = (
+  message: MessageInfo,
+  index: number
+): ICheckSlowReply => {
+  return new CheckSlowReply(message, show_list_message.value?.[index + 1])
+}
+
+// Helper kiểm tra xem có staff nào đọc tại message này không (logic tương đương StaffRead.vue)
+const hasStaffReadAtMessage = (
+  message: MessageInfo,
+  newer_message?: MessageInfo
+) => {
+  const store_staff_read =
+    conversationStore.select_conversation?.staff_read || {}
+  const msg_time = new Date(message.time || message.createdAt).getTime()
+  const newer_time = newer_message
+    ? new Date(newer_message.time || newer_message.createdAt).getTime()
+    : Infinity
+
+  return Object.keys(store_staff_read).some(staff_id => {
+    const read_time = store_staff_read[staff_id]
+    if (!read_time) return false
+
+    // Check valid staff
+    const staff_name = getStaffName(
+      conversationStore.select_conversation?.fb_page_id,
+      staff_id
+    )
+    if (!staff_name) return false
+
+    // Logic: read_time >= msg_time && read_time < newer_time
+    return read_time >= msg_time && read_time < newer_time
+  })
+}
+
+const updateMessageInfo = async (message: MessageInfo) => {}
 /**kiểm tra xem tin nhắn này có phải là tin nhắn cuối cùng của nhân viên gửi không */
 function isLastPageMessage(message: MessageInfo, index: number) {
   // chỉ tính tin nhắn của trang
@@ -653,12 +754,13 @@ const visibleFirstClientReadAvatar = debounce(() => {
     // nếu không có thì thôi
     if (!ELEMENT) return
     // với column-reverse: hiển thị avatar đầu tiên (index 0) - tin mới nhất
+    // dùng opacity thay vì display để transition mượt
     if (index === 0) {
-      ELEMENT.style.display = 'block'
+      ELEMENT.style.opacity = '1'
     }
     // ẩn các avatar còn lại
     else {
-      ELEMENT.style.display = 'none'
+      ELEMENT.style.opacity = '0'
     }
   })
 }, 50)
@@ -687,10 +789,28 @@ function visibleLastStaffReadAvatar(staff_id: string) {
     // lặp qua toàn bộ các div
     LIST_AVATAR.forEach((element: any, i: number) => {
       // với column-reverse: hiển thị avatar ĐẦU TIÊN (index 0) - tin mới nhất
-      if (i === 0) element.style.display = 'block'
-      // ẩn các avatar còn lại
-      else element.style.display = 'none'
+      // dùng opacity thay vì display để transition mượt
+      if (i === 0) {
+        element.style.display = 'block' // Hiện avatar đầu tiên
+        element.style.opacity = '1'
+      }
+      // ẩn các avatar còn lại - dùng display: none để không chiếm width
+      else {
+        element.style.display = 'none'
+        element.style.opacity = '0'
+      }
     })
+
+    // Hiển thị badge ở tin nhắn đầu tiên (nếu có)
+    if (LIST_AVATAR.length > 0) {
+      const first_avatar = LIST_AVATAR[0]
+      const badge =
+        first_avatar.parentElement?.querySelector('.staff-read-badge')
+      if (badge) {
+        ;(badge as HTMLElement).style.display = 'flex'
+        ;(badge as HTMLElement).style.opacity = '1'
+      }
+    }
   }
 }
 

@@ -80,7 +80,7 @@
         }
       `"
     />
-    <MessageDate
+    <!-- <MessageDate
       :class="{
         'right-0': message_type !== 'client',
       }"
@@ -99,7 +99,7 @@
       :fb_page_id="message.fb_page_id"
       :sender_id="message.sender_id"
       :message_type="message.message_type"
-    />
+    /> -->
     <MessageReaction
       v-if="
         (message_type === 'client' ||

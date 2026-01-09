@@ -1,8 +1,7 @@
 <template>
   <div
     id="chat__message-date"
-    class="text-xxs text-slate-500 absolute group-hover:block hidden w-max z-10 -bottom-3.5"
-    :class="sender_id === fb_page_id ? 'right-0' : 'left-0'"
+    class="text-xxs text-slate-500 whitespace-nowrap"
   >
     <span
       v-if="parserStaffName()"

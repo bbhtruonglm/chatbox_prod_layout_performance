@@ -28,7 +28,9 @@
               $t('v1.view.main.dashboard.chat.center_content.staff_read_time')
             }}
           </div>
-          <div class="py-2 flex flex-col gap-4">
+          <div
+            class="py-2 flex flex-col gap-4 max-h-[60vh] overflow-y-auto px-2"
+          >
             <div
               v-for="staff_id of messageStore.select_staff_read_id"
               class="flex items-center gap-3"
