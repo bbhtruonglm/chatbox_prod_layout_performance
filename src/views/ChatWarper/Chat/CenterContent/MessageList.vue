@@ -382,12 +382,22 @@ const handleScrollTopDate = throttle(() => {
   if (!container) return
 
   // Tìm element ở vị trí top của container
-  // Lấy vị trí tương đối so với viewport
   const rect = container.getBoundingClientRect()
-  // Lấy element tại vị trí top + 50px (để tránh bị che hoặc ở mép)
-  // Vì là flex-col-reverse, nên top visual lại là đáy?
-  // Không, rect.top là top visual của khung chat.
-  // elementFromPoint lấy theo viewport coordinates.
+
+  // 1. Check collision với TimeSplit (tránh hiện 2 cái trùng nhau)
+  const markers = container.querySelectorAll('.time-split-marker')
+  for (const marker of markers) {
+    const markerRect = marker.getBoundingClientRect()
+    // Sticky badge ở top-5 (~20px), cao ~30px.
+    // Nếu TimeSplit đi vào vùng top 0-80px thì ẩn badge sticky
+    const distanceFromTop = markerRect.top - rect.top
+    if (distanceFromTop >= 0 && distanceFromTop <= 80) {
+      is_show_scroll_date.value = false
+      return
+    }
+  }
+
+  // Lấy element tại vị trí top + 80px
   const el = document.elementFromPoint(
     rect.left + rect.width / 2,
     rect.top + 80
@@ -420,13 +430,13 @@ const handleScrollTopDate = throttle(() => {
       const leaderMsg = list[leaderIndex]
       const dateToFormat = leaderMsg.time || leaderMsg.createdAt
 
-      // Format giống TimeSplit: 'HH:mm, dd/MM/yyyy'
+      // Format giống TimeSplit: 'dd/MM/yyyy'
       current_scroll_date.value = format(new Date(dateToFormat), 'dd/MM/yyyy')
       is_show_scroll_date.value = true
 
       // Clear cũ
       clearTimeout(scroll_date_timeout)
-      // Auto hide sau 5s
+      // Auto hide sau 1s
       scroll_date_timeout = setTimeout(() => {
         is_show_scroll_date.value = false
       }, 1000)
