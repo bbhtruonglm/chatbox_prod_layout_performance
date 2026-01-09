@@ -38,8 +38,11 @@ function isShowTimeSplit() {
   const BEFORE_DATE =
     $props.before_message?.time || $props.before_message?.createdAt
 
-  // nếu trước đó không có tin nhắn thì thôi
-  if (!BEFORE_DATE || !NOW_DATE) return false
+  // nếu không có tin nhắn hiện tại thì thôi
+  if (!NOW_DATE) return false
+
+  // nếu trước đó không có tin nhắn (đầu cuộc trò chuyện) -> hiện
+  if (!BEFORE_DATE) return true
 
   // nếu cùng ngày thì thôi
   if (isSameDay(new Date(NOW_DATE), new Date(BEFORE_DATE))) return false

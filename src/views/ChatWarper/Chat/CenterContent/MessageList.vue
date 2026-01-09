@@ -54,10 +54,11 @@
         :data-time="message.time || message.createdAt"
         :data-index="index"
       >
+        <!-- <div class="flex flex-col gap-2 sticky top-0 z-50"> -->
         <div class="flex flex-col gap-2">
           <UnReadAlert :index="index" />
           <TimeSplit
-            :before_message="show_list_message?.[index - 1]"
+            :before_message="show_list_message?.[index + 1]"
             :now_message="message"
           />
         </div>
@@ -386,20 +387,23 @@ const handleScrollTopDate = throttle(() => {
   // Tìm element ở vị trí top của container
   const rect = container.getBoundingClientRect()
 
-  // 1. Check collision với TimeSplit (tránh hiện 2 cái trùng nhau)
+  // 1. Check collision với TimeSplit
+  // Thay vì ẩn Sticky, ta ẩn TimeSplit để tạo hiệu ứng mượt hơn
   const markers = container.querySelectorAll('.time-split-marker')
-  for (const marker of markers) {
-    const markerRect = marker.getBoundingClientRect()
-    // Sticky badge ở top-5 (~20px), cao ~30px.
-    // Nếu TimeSplit đi vào vùng top 0-80px thì ẩn badge sticky
+  markers.forEach(marker => {
+    const el = marker as HTMLElement
+    const markerRect = el.getBoundingClientRect()
     const distanceFromTop = markerRect.top - rect.top
-    if (distanceFromTop >= 0 && distanceFromTop <= 80) {
-      is_show_scroll_date.value = false
-      return
-    }
-  }
 
-  // Lấy element tại vị trí top + 80px
+    // Nếu TimeSplit đi vào vùng top 0-80px (vùng hiển thị sticky) hoặc đã đi qua
+    if (distanceFromTop <= 80) {
+      el.style.opacity = '0' // Ẩn TimeSplit
+    } else {
+      el.style.opacity = '1' // Hiện TimeSplit
+    }
+  })
+
+  // Lấy element tại vị trí top + 80px để xác định ngày hiện tại
   const el = document.elementFromPoint(
     rect.left + rect.width / 2,
     rect.top + 80
@@ -416,15 +420,13 @@ const handleScrollTopDate = throttle(() => {
     if (currentMsg) {
       const currentDate = new Date(currentMsg.time || currentMsg.createdAt)
 
-      // Tìm message "Leader" của ngày này (message mới nhất của ngày - index nhỏ nhất)
+      // Tìm message "Leader" của ngày này
       let leaderIndex = currentIndex
-      // Duyệt ngược về 0 (tin mới hơn)
       for (let i = currentIndex - 1; i >= 0; i--) {
         const prevDate = new Date(list[i].time || list[i].createdAt)
         if (isSameDay(prevDate, currentDate)) {
           leaderIndex = i
         } else {
-          // Khác ngày -> dừng
           break
         }
       }
@@ -432,15 +434,18 @@ const handleScrollTopDate = throttle(() => {
       const leaderMsg = list[leaderIndex]
       const dateToFormat = leaderMsg.time || leaderMsg.createdAt
 
-      // Format giống TimeSplit: 'dd/MM/yyyy'
+      // Update date logic
       current_scroll_date.value = format(new Date(dateToFormat), 'dd/MM/yyyy')
       is_show_scroll_date.value = true
 
       // Clear cũ
       clearTimeout(scroll_date_timeout)
-      // Auto hide sau 1s
+      // Auto hide sau 1s và reset opacity
       scroll_date_timeout = setTimeout(() => {
         is_show_scroll_date.value = false
+        // Reset toàn bộ opacity TimeSplit khi hết timeout
+        const allMarkers = container.querySelectorAll('.time-split-marker')
+        allMarkers.forEach(m => ((m as HTMLElement).style.opacity = '1'))
       }, 1000)
     }
   }
