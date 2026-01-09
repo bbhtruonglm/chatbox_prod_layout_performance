@@ -152,7 +152,9 @@
         <div class="relative h-0">
           <!-- CASE 1: Tin nhắn Client (Bên trái) -> MessageDate nằm bên trái -->
           <MessageDate
-            v-if="['client', 'customer'].includes(message.message_type)"
+            v-if="
+              ['client', 'customer', 'group'].includes(message.message_type)
+            "
             class="absolute left-10 z-10 -top-3 hidden group-hover:block whitespace-nowrap"
             :time="message.time || message.createdAt"
             :meta="message.message_metadata"
@@ -177,7 +179,7 @@
               <!-- MessageDate cho Page - nằm cạnh StaffRead (absolute left) -->
               <MessageDate
                 v-if="
-                  !['client', 'customer', 'system'].includes(
+                  !['client', 'customer', 'system', 'group'].includes(
                     message.message_type
                   ) && message.platform_type !== 'FB_POST'
                 "
