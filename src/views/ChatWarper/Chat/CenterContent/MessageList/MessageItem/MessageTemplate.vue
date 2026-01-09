@@ -1,96 +1,115 @@
 <template>
-  <div
-    id="chat__message-template"
-    :class="is_fix_size ? 'w-[300px]' : 'max-w-[300px]'"
-    class="rounded-lg p-2 gap-2.5 flex flex-col flex-shrink-0"
-    @dblclick="copyMessage(message.message_text || '')"
-  >
+  <div class="flex items-end gap-1 group/template rounded-lg">
     <div
-      v-if="isHaveFileAttachment() || data_source?.is_ai"
-      class="flex justify-between gap-2"
-    >
-      <Media
-        v-if="isHaveFileAttachment()"
-        :data_source
-        :attachment_size
-        :message
-      />
-      <button
-        v-if="data_source?.is_ai"
-        @click="is_expanded = !is_expanded"
-        class="flex-shrink-0 bg-slate-200 rounded-lg w-7 h-7 flex items-center justify-center"
-      >
-        <template v-if="!is_expanded">
-          <ArrowRightIcon class="w-3 h-3 flex-shrink-0" />
-          <span class="font-medium text-sm">A</span>
-        </template>
-        <ArrowDownIcon
-          v-else
-          class="w-3.5 h-3.5 rotate-180"
-        />
-      </button>
-    </div>
-    <div
-      v-if="(data_source?.title || data_source?.content) && is_expanded"
-      class="text-sm"
+      id="chat__message-template"
+      :class="is_fix_size ? 'w-[300px]' : 'max-w-[300px]'"
+      class="rounded-lg p-2 gap-1 flex flex-col flex-shrink-0 relative"
+      @dblclick="copyMessage(message.message_text || '')"
     >
       <div
-        v-if="data_source?.title"
-        class="font-semibold enter-line"
+        v-if="isHaveFileAttachment() || data_source?.is_ai"
+        class="flex justify-between gap-2"
       >
-        {{ data_source?.title }}
+        <Media
+          v-if="isHaveFileAttachment()"
+          :data_source
+          :attachment_size
+          :message
+        />
+        <button
+          v-if="data_source?.is_ai"
+          @click="is_expanded = !is_expanded"
+          class="flex-shrink-0 bg-slate-200 rounded-lg w-7 h-7 flex items-center justify-center"
+        >
+          <template v-if="!is_expanded">
+            <ArrowRightIcon class="w-3 h-3 flex-shrink-0" />
+            <span class="font-medium text-sm">A</span>
+          </template>
+          <ArrowDownIcon
+            v-else
+            class="w-3.5 h-3.5 rotate-180"
+          />
+        </button>
       </div>
-      <!-- <div
+      <div
+        v-if="(data_source?.title || data_source?.content) && is_expanded"
+        class="text-sm"
+      >
+        <div
+          v-if="data_source?.title"
+          class="font-semibold enter-line"
+        >
+          {{ data_source?.title }}
+        </div>
+        <!-- <div
         v-if="data_source?.content"
         @click="clickCopyPhoneEmail"
         v-html="fixXss(renderText(data_source?.content))"
         class="enter-line"
       /> -->
 
+        <div
+          ref="ref_message_content"
+          class="enter-line"
+          :class="{
+            'overflow-hidden': !is_view_full,
+          }"
+          :style="{
+            'max-height': is_view_full ? 'unset' : `${MAX_HEIGHT_CONTENT}px`,
+          }"
+          v-if="data_source?.content"
+          @click="clickCopyPhoneEmail"
+          v-html="fixXss($markdown.render(renderTextWithMentions))"
+        />
+        <p
+          v-if="
+            ((!is_view_full && ref_message_content?.clientHeight) || 0) >=
+            MAX_HEIGHT_CONTENT
+          "
+          @click="is_view_full = true"
+        >
+          ...
+          <span class="text-blue-500 cursor-pointer"
+            >{{ $t('Xem thêm') }}
+          </span>
+        </p>
+        <!-- class="enter-line" -->
+      </div>
+
+      <!-- Hiển thị text gốc (caption) nếu bị ghi đè bởi content AI (subtitle) -->
       <div
-        ref="ref_message_content"
-        class="enter-line"
-        :class="{
-          'overflow-hidden': !is_view_full,
-        }"
-        :style="{
-          'max-height': is_view_full ? 'unset' : `${MAX_HEIGHT_CONTENT}px`,
-        }"
-        v-if="data_source?.content"
-        @click="clickCopyPhoneEmail"
-        v-html="fixXss($markdown.render(renderTextWithMentions))"
-      />
-      <p
         v-if="
-          ((!is_view_full && ref_message_content?.clientHeight) || 0) >=
-          MAX_HEIGHT_CONTENT
+          message.message_text &&
+          message.message_text !== data_source?.content &&
+          data_source?.is_ai
         "
-        @click="is_view_full = true"
-      >
-        ...
-        <span class="text-blue-500 cursor-pointer">{{ $t('Xem thêm') }} </span>
-      </p>
-      <!-- class="enter-line" -->
+        class="text-sm enter-line pt-2 border-t mt-2 border-slate-100"
+        @click="clickCopyPhoneEmail"
+        v-html="fixXss($markdown.render(message.message_text))"
+      />
+      <Action
+        v-if="data_source?.list_button?.length"
+        :list_button="data_source?.list_button"
+        :ai="data_source?.ai"
+        :message_id="message?._id"
+        :message
+      />
     </div>
 
-    <!-- Hiển thị text gốc (caption) nếu bị ghi đè bởi content AI (subtitle) -->
+    <!-- Moved Footer (Outside Bubble) -->
     <div
-      v-if="
-        message.message_text &&
-        message.message_text !== data_source?.content &&
-        data_source?.is_ai
-      "
-      class="text-sm enter-line pt-2 border-t mt-2 border-slate-100"
-      @click="clickCopyPhoneEmail"
-      v-html="fixXss($markdown.render(message.message_text))"
-    />
-    <Action
-      v-if="data_source?.list_button?.length"
-      :list_button="data_source?.list_button"
-      :ai="data_source?.ai"
-      :message_id="message?._id"
-      :message
-    />
+      class="flex flex-col justify-end text-[10px] text-slate-400 select-none pb-1 px-2"
+    >
+      <div class="flex items-center gap-1">
+        <span>
+          {{ $date_handle.format(message.time || message.createdAt, 'HH:mm') }}
+        </span>
+        <DoubleCheckIcon
+          v-if="isPageMessage()"
+          class="w-3.5 h-3.5 text-green-500"
+        />
+      </div>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
@@ -99,12 +118,15 @@ import { MarkedService } from '@/utils/helper/Markdown'
 import DOMPurify from 'dompurify'
 import { container } from 'tsyringe'
 import { ref, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { DateHandle } from '@/utils/helper/DateHandle'
 
 import Action from '@/views/ChatWarper/Chat/CenterContent/MessageList/MessageItem/MessageTemplate/Action.vue'
 import Media from '@/views/ChatWarper/Chat/CenterContent/MessageList/MessageItem/MessageTemplate/Media.vue'
 
 import ArrowDownIcon from '@/components/Icons/ArrowDown.vue'
 import ArrowRightIcon from '@/components/Icons/ArrowRight.vue'
+import DoubleCheckIcon from '@/components/Icons/DoubleCheck.vue'
 
 import type {
   AttachmentSize,
@@ -112,6 +134,10 @@ import type {
   MessageTemplateInput,
 } from '@/service/interface/app/message'
 import { copyToClipboard } from '@/service/helper/copyWithAlert'
+
+/** i18n */
+const { t: $t } = useI18n()
+const $date_handle = container.resolve(DateHandle)
 
 /** chiều cao tối đa cho nội dung khi ở mặc định */
 const MAX_HEIGHT_CONTENT = 160
@@ -221,5 +247,26 @@ function copyMessage(message: string) {
   // nếu không có nội dung thì thôi
   if (!message) return
   copyToClipboard(message)
+}
+
+/**phân tích tên nv từ meta */
+function parserStaffName() {
+  /** tên nhân sự nhắn tin */
+  const STAFF_NAME =
+    $props.message?.message_metadata?.split('__')?.[1] ||
+    $props.message?.group_client_name
+
+  // nếu không có thì là AI nhắn
+  if (STAFF_NAME === 'undefined') return ''
+  // Trả ra tên của người gửi
+  return STAFF_NAME
+}
+
+/**Kiểm tra có hiển thị double check không (tin nhắn page/note) */
+function isPageMessage() {
+  return (
+    ['page', 'note'].includes($props.message?.message_type) ||
+    $props.message?.sender_id === $props.message?.fb_page_id
+  )
 }
 </script>

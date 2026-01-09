@@ -247,6 +247,20 @@ watch(
   },
   { immediate: true }
 )
+
+/**
+ * Watch id của tổ chức
+ * nếu thay đổi thì clear count_conversation để tránh hiển thị data cũ
+ */
+watch(
+  () => orgStore.selected_org_id,
+  () => {
+    // clear count_conversation để tránh hiển thị data cũ
+    conversationStore.count_conversation = { chat: 0, post: 0 }
+  },
+  { flush: 'sync' }
+)
+
 /**giá trị của ô tìm kiếm hội thoại */
 const search_conversation = ref<string>()
 /**trạng thái tìm kiếm */

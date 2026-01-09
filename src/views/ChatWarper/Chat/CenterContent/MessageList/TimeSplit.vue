@@ -27,7 +27,8 @@ function formatNowDate() {
   const DATE = $props.now_message.time || $props.now_message.createdAt
 
   // format theo template
-  return date_format(new Date(DATE), 'HH:mm, dd/MM/yyyy')
+  // return date_format(new Date(DATE), 'HH:mm, dd/MM/yyyy')
+  return date_format(new Date(DATE), 'dd/MM/yyyy')
 }
 /**chỉ hiện thị khoảng ngắt thời gian khi cách ngày */
 function isShowTimeSplit() {

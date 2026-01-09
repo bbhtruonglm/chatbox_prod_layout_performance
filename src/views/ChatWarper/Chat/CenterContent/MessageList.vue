@@ -38,13 +38,24 @@
       ></div>
 
       <!-- <HeaderChat /> -->
+      <!-- Floating Date Badge -->
+      <!-- class="absolute top-5 left-1/2 transform -translate-x-1/2 z-50 px-3 py-1 bg-slate-500/80 backdrop-blur-sm text-white rounded-full text-xs font-medium shadow-sm transition-opacity duration-300 pointer-events-none" -->
+      <div
+        v-show="is_show_scroll_date && current_scroll_date"
+        class="absolute top-5 left-1/2 transform -translate-x-1/2 z-50 px-3 text-slate-100 w-fit mx-auto bg-slate-600 rounded-lg text-center text-xs font-medium my-2"
+      >
+        {{ current_scroll_date }}
+      </div>
+
       <div
         v-for="(message, index) of show_list_message"
         :key="message._id"
         class="relative group"
+        :data-time="message.time || message.createdAt"
+        :data-index="index"
       >
         <div class="flex flex-col gap-2">
-          <UnReadAlert :index />
+          <UnReadAlert :index="index" />
           <TimeSplit
             :before_message="show_list_message?.[index - 1]"
             :now_message="message"
@@ -120,10 +131,11 @@
                 message.message_mid && message.message_mid !== 'undefined'
               "
             /> -->
-            <DoubleCheckIcon
-              v-if="isLastPageMessage(message, index)"
-              class="w-3 h-3 text-green-500 absolute -bottom-0.5 -right-12"
-            />
+            <!-- <UnsupportMessage
+              v-else-if="
+                message.message_mid && message.message_mid !== 'undefined'
+              "
+            /> -->
           </div>
           <PageStaffAvatar
             :message
@@ -226,6 +238,7 @@
 </template>
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { format, isSameDay } from 'date-fns'
 import {
   useConversationStore,
   useMessageStore,
@@ -237,7 +250,7 @@ import { flow } from '@/service/helper/async'
 import { read_message } from '@/service/api/chatbox/n4-service'
 import { toastError } from '@/service/helper/alert'
 import { getPageInfo, getStaffName } from '@/service/function'
-import { debounce, findLastIndex, remove, size } from 'lodash'
+import { debounce, findLastIndex, remove, size, throttle } from 'lodash'
 import {
   CheckSlowReply,
   type ICheckSlowReply,
@@ -355,6 +368,71 @@ const last_client_message_index = computed(() =>
     m => m.message_type === 'page' && !!m.message_metadata
   )
 )
+
+/**ngày hiện tại đang scroll tới */
+const current_scroll_date = ref<string>('')
+/**có hiển thị ngày scroll không */
+const is_show_scroll_date = ref(false)
+/**timeout ẩn ngày scroll */
+let scroll_date_timeout: ReturnType<typeof setTimeout> | undefined
+
+/**xử lý hiển thị ngày khi scroll */
+const handleScrollTopDate = throttle(() => {
+  const container = document.getElementById(messageStore.list_message_id)
+  if (!container) return
+
+  // Tìm element ở vị trí top của container
+  // Lấy vị trí tương đối so với viewport
+  const rect = container.getBoundingClientRect()
+  // Lấy element tại vị trí top + 50px (để tránh bị che hoặc ở mép)
+  // Vì là flex-col-reverse, nên top visual lại là đáy?
+  // Không, rect.top là top visual của khung chat.
+  // elementFromPoint lấy theo viewport coordinates.
+  const el = document.elementFromPoint(
+    rect.left + rect.width / 2,
+    rect.top + 80
+  )
+
+  // Tìm element cha có attribute data-time
+  const messageEl = el?.closest('[data-time]') as HTMLElement
+
+  if (messageEl && messageEl.dataset.index) {
+    const currentIndex = parseInt(messageEl.dataset.index)
+    const list = show_list_message.value
+    const currentMsg = list[currentIndex]
+
+    if (currentMsg) {
+      const currentDate = new Date(currentMsg.time || currentMsg.createdAt)
+
+      // Tìm message "Leader" của ngày này (message mới nhất của ngày - index nhỏ nhất)
+      let leaderIndex = currentIndex
+      // Duyệt ngược về 0 (tin mới hơn)
+      for (let i = currentIndex - 1; i >= 0; i--) {
+        const prevDate = new Date(list[i].time || list[i].createdAt)
+        if (isSameDay(prevDate, currentDate)) {
+          leaderIndex = i
+        } else {
+          // Khác ngày -> dừng
+          break
+        }
+      }
+
+      const leaderMsg = list[leaderIndex]
+      const dateToFormat = leaderMsg.time || leaderMsg.createdAt
+
+      // Format giống TimeSplit: 'HH:mm, dd/MM/yyyy'
+      current_scroll_date.value = format(new Date(dateToFormat), 'dd/MM/yyyy')
+      is_show_scroll_date.value = true
+
+      // Clear cũ
+      clearTimeout(scroll_date_timeout)
+      // Auto hide sau 5s
+      scroll_date_timeout = setTimeout(() => {
+        is_show_scroll_date.value = false
+      }, 1000)
+    }
+  }
+}, 100)
 
 // lắng nghe sự kiện từ socket khi component được tạo ra
 onMounted(() => {
@@ -599,6 +677,9 @@ function onScrollMessage($event: Event) {
 
   // xử lý load dữ liệu tin nhắn
   debounceLoadMoreMessage($event as UIEvent)
+
+  // xử lý hiển thị ngày khi scroll (tele-style sticky date overlay)
+  handleScrollTopDate()
 }
 
 /** hàm debounce load dữ liệu tin nhắn */
